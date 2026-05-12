@@ -1,0 +1,42 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Visual Studio / Rider generated files
+.vs/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+
+# Unity generated files
+*.pidb.meta
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.unityproj
+sysinfo.txt
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Unity local/cache artifacts
+[Aa]ssets/AssetStoreTools*
+[Aa]ssets/StreamingAssets/aa.meta
+[Aa]ssets/StreamingAssets/aa/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+[Cc]rash[Rr]eports/
