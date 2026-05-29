@@ -16,6 +16,10 @@ public class OrigamiLoader : MonoBehaviour
     [Header("折痕材质")]
     public Material creaseMaterial; // ✅ 新增字段（在 Inspector 中设置）
 
+    [Header("Physics Colliders")]
+    [Min(0.001f)]
+    public float colliderThickness = 0.01f;
+
     [Header("UI 控制")]
     public Slider foldSlider;
     public Text modelNameText;
@@ -160,23 +164,30 @@ public class OrigamiLoader : MonoBehaviour
     {
         foreach (var face in model.faces)
         {
+            if (face.vertices == null || face.vertices.Count < 3)
+            {
+                Debug.LogWarning($"[OrigamiLoader] Skip Face_{face.id}: fewer than 3 vertices");
+                continue;
+            }
+
             GameObject obj = new GameObject($"Face_{face.id}");
             obj.transform.parent = transform;
 
             Mesh mesh = new Mesh();
             Vector3[] fVerts = new Vector3[face.vertices.Count];
-            int[] tris = new int[(face.vertices.Count - 2) * 3];
 
             for (int i = 0; i < face.vertices.Count; i++)
                 fVerts[i] = vertices[face.vertices[i] - 1];
 
-            for (int i = 0; i < face.vertices.Count - 2; i++)
+            int[] tris = BuildFaceTriangles(fVerts);
+            if (tris.Length < 3)
             {
-                tris[i * 3] = 0;
-                tris[i * 3 + 1] = i + 1;
-                tris[i * 3 + 2] = i + 2;
+                Debug.LogWarning($"[OrigamiLoader] Skip Face_{face.id}: triangulation failed");
+                Destroy(obj);
+                continue;
             }
 
+            mesh.name = $"Face_{face.id}_Mesh";
             mesh.vertices = fVerts;
             mesh.triangles = tris;
             mesh.RecalculateNormals();
@@ -195,19 +206,142 @@ public class OrigamiLoader : MonoBehaviour
 
             renderer.material = faceMat;  // 直接使用材质
 
+            CreateFaceColliderChildren(obj, mesh, face.id);
+
             Rigidbody rb = obj.AddComponent<Rigidbody>();
             rb.useGravity = false;
             rb.mass = face.rigid ? 0.2f : 0.1f;
             rb.drag = face.rigid ? 0.8f : 0.5f;
             rb.angularDrag = face.rigid ? 0.8f : 0.5f;
 
-            // 在CreateFaces()方法中，添加完Rigidbody后
-            MeshCollider collider = obj.AddComponent<MeshCollider>();
-            collider.isTrigger = false; // 通常不需要触发器
-
             faceObjects[face.id] = obj;
             faceListObjects.Add(obj);
         }
+    }
+
+    private int[] BuildFaceTriangles(Vector3[] faceVertices)
+    {
+        if (faceVertices.Length == 3)
+            return new[] { 0, 1, 2 };
+
+        int[] triangulated = new Triangulator(faceVertices).Triangulate();
+        if (triangulated != null && triangulated.Length >= 3)
+            return OrientTrianglesToFaceNormal(faceVertices, triangulated);
+
+        int[] fanTriangles = new int[(faceVertices.Length - 2) * 3];
+        for (int i = 0; i < faceVertices.Length - 2; i++)
+        {
+            fanTriangles[i * 3] = 0;
+            fanTriangles[i * 3 + 1] = i + 1;
+            fanTriangles[i * 3 + 2] = i + 2;
+        }
+
+        return OrientTrianglesToFaceNormal(faceVertices, fanTriangles);
+    }
+
+    private int[] OrientTrianglesToFaceNormal(Vector3[] faceVertices, int[] triangles)
+    {
+        Vector3 faceNormal = CalculatePolygonNormal(faceVertices);
+        if (faceNormal.sqrMagnitude < 0.000001f)
+            return triangles;
+
+        int[] oriented = (int[])triangles.Clone();
+        for (int i = 0; i < oriented.Length; i += 3)
+        {
+            Vector3 a = faceVertices[oriented[i]];
+            Vector3 b = faceVertices[oriented[i + 1]];
+            Vector3 c = faceVertices[oriented[i + 2]];
+            Vector3 triangleNormal = Vector3.Cross(b - a, c - a);
+
+            if (Vector3.Dot(triangleNormal, faceNormal) < 0f)
+            {
+                int temp = oriented[i + 1];
+                oriented[i + 1] = oriented[i + 2];
+                oriented[i + 2] = temp;
+            }
+        }
+
+        return oriented;
+    }
+
+    private Vector3 CalculatePolygonNormal(Vector3[] faceVertices)
+    {
+        Vector3 normal = Vector3.zero;
+        for (int i = 0; i < faceVertices.Length; i++)
+        {
+            Vector3 current = faceVertices[i];
+            Vector3 next = faceVertices[(i + 1) % faceVertices.Length];
+
+            normal.x += (current.y - next.y) * (current.z + next.z);
+            normal.y += (current.z - next.z) * (current.x + next.x);
+            normal.z += (current.x - next.x) * (current.y + next.y);
+        }
+
+        return normal.normalized;
+    }
+
+    private void CreateFaceColliderChildren(GameObject faceObject, Mesh faceMesh, int faceId)
+    {
+        Vector3[] meshVertices = faceMesh.vertices;
+        int[] meshTriangles = faceMesh.triangles;
+
+        for (int i = 0; i < meshTriangles.Length; i += 3)
+        {
+            Vector3 a = meshVertices[meshTriangles[i]];
+            Vector3 b = meshVertices[meshTriangles[i + 1]];
+            Vector3 c = meshVertices[meshTriangles[i + 2]];
+
+            GameObject colliderObject = new GameObject($"Face_{faceId}_Collider_{i / 3}");
+            colliderObject.layer = faceObject.layer;
+            colliderObject.transform.SetParent(faceObject.transform, false);
+            colliderObject.transform.localPosition = Vector3.zero;
+            colliderObject.transform.localRotation = Quaternion.identity;
+            colliderObject.transform.localScale = Vector3.one;
+
+            MeshCollider collider = colliderObject.AddComponent<MeshCollider>();
+            collider.sharedMesh = CreateTrianglePrismMesh(a, b, c, colliderThickness, faceId, i / 3);
+            collider.convex = true;
+            collider.isTrigger = false;
+        }
+    }
+
+    private Mesh CreateTrianglePrismMesh(Vector3 a, Vector3 b, Vector3 c, float thickness, int faceId, int triangleIndex)
+    {
+        Vector3 normal = Vector3.Cross(b - a, c - a);
+        if (normal.sqrMagnitude < 0.000001f)
+            normal = Vector3.up;
+        else
+            normal.Normalize();
+
+        float halfThickness = Mathf.Max(0.001f, thickness) * 0.5f;
+        Vector3 offset = normal * halfThickness;
+
+        Mesh prismMesh = new Mesh();
+        prismMesh.name = $"Face_{faceId}_Collider_{triangleIndex}_Mesh";
+        prismMesh.vertices = new[]
+        {
+            a - offset,
+            b - offset,
+            c - offset,
+            a + offset,
+            b + offset,
+            c + offset
+        };
+        prismMesh.triangles = new[]
+        {
+            0, 2, 1,
+            3, 4, 5,
+            0, 1, 4,
+            0, 4, 3,
+            1, 2, 5,
+            1, 5, 4,
+            2, 0, 3,
+            2, 3, 5
+        };
+        prismMesh.RecalculateNormals();
+        prismMesh.RecalculateBounds();
+
+        return prismMesh;
     }
 
     private void CreateCreasesAndConnections()

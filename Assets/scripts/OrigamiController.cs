@@ -8,6 +8,7 @@ public class OrigamiController : MonoBehaviour
     private List<HingeJoint> hinges = new List<HingeJoint>();
     public float foldSpeed = 30f;
     public float rotationSpeed = 50f;
+    public bool enableKeyboardRotation = false;
     public List<HingeJoint> GetHinges() { return hinges; }
 
 
@@ -82,6 +83,9 @@ public class OrigamiController : MonoBehaviour
     // 处理旋转输入
     private void HandleRotationInput()
     {
+        if (!enableKeyboardRotation)
+            return;
+
         if (Input.GetKey(KeyCode.A))
             transform.Rotate(Vector3.up, -rotationSpeed * Time.deltaTime);
         if (Input.GetKey(KeyCode.D))
