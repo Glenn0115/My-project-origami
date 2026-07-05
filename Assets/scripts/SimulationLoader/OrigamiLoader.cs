@@ -6,7 +6,8 @@ using UnityEngine.UI;
 public class OrigamiLoader : MonoBehaviour
 {
     [Header("模型文件")]
-    public string jsonPath = "Models/miura0.json";
+    public string jsonPath = "D:\\0work\\Develop\\unity\\Origami_Simulator\\Assets\\scripts\\CustomPattern_minAngle0.json";    //所需文件路径和文件名
+    
     public Material defaultMaterial;
 
     [Header("可视化设置")]
@@ -21,7 +22,6 @@ public class OrigamiLoader : MonoBehaviour
     public float colliderThickness = 0.01f;
 
     [Header("UI 控制")]
-    public Slider foldSlider;
     public Text modelNameText;
     public Text modelDescriptionText;
 
@@ -41,17 +41,7 @@ public class OrigamiLoader : MonoBehaviour
 
     void Start()
     {
-        if (foldSlider != null)
-            foldSlider.onValueChanged.AddListener(OnFoldSliderChanged);
-
         LoadModel();
-    }
-
-    private void OnFoldSliderChanged(float value)
-    {
-        var controller = GetComponent<OrigamiController>();
-        if (controller != null)
-            controller.foldProgress = value;
     }
 
     public void LoadModel(string customPath = null)

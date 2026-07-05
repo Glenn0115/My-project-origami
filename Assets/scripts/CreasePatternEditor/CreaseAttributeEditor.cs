@@ -9,7 +9,6 @@ public class CreaseAttributeEditor
     private readonly Material _mountainMat;
     private readonly Material _valleyMat;
     private readonly Material _boundaryMat;
-    private readonly Material _flatMat;
     private readonly float _baseCreaseWidth;
 
     public CreaseAttributeEditor(
@@ -18,7 +17,6 @@ public class CreaseAttributeEditor
         Material mountainMat,
         Material valleyMat,
         Material boundaryMat,
-        Material flatMat,
         float baseCreaseWidth)
     {
         _creases = creases;
@@ -26,7 +24,6 @@ public class CreaseAttributeEditor
         _mountainMat = mountainMat;
         _valleyMat = valleyMat;
         _boundaryMat = boundaryMat;
-        _flatMat = flatMat;
         _baseCreaseWidth = baseCreaseWidth;
     }
 
@@ -49,14 +46,13 @@ public class CreaseAttributeEditor
             CreasePatternEditor.CreaseType.Mountain => _mountainMat,
             CreasePatternEditor.CreaseType.Valley => _valleyMat,
             CreasePatternEditor.CreaseType.Boundary => _boundaryMat,
-            _ => _flatMat // 包括 Flat 和未知类型
+            _ => _boundaryMat
         };
 
         // 设置线宽
         float width = _baseCreaseWidth;
         if (type == CreasePatternEditor.CreaseType.Boundary)
             width *= 1.5f;
-        // 可选：else if (type == CreasePatternEditor.CreaseType.Flat) width *= 0.7f;
 
         lr.startWidth = lr.endWidth = width;
 

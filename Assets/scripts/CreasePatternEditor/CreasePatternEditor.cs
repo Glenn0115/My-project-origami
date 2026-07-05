@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,7 +39,6 @@ public class CreasePatternEditor : MonoBehaviour
     public Toggle mountainToggle;
     public Toggle valleyToggle;
     public Toggle boundaryToggle;
-    public Toggle flatToggle;
 
     [Header("折痕属性面板（可选）")]
     public CreaseAttributePanel creaseAttributePanel;
@@ -67,7 +67,7 @@ public class CreasePatternEditor : MonoBehaviour
         public float angle; // 目标折叠角度（度数）
         public float width;
         // 👇 新增以下两行
-        public float minAngle = -180f; // 默认最小角度
+        public float minAngle = 0f; // 默认最小角度
         public float maxAngle = 180f;  // 默认最大角度
     }
 
@@ -102,7 +102,7 @@ public class CreasePatternEditor : MonoBehaviour
     }
 
     // FIX: 折痕类型枚举（替代原布尔字段）
-    public enum CreaseType { Mountain, Valley, Boundary, Flat }
+    public enum CreaseType { Mountain, Valley, Boundary }
     #endregion
 
     #region Runtime State
@@ -118,15 +118,12 @@ public class CreasePatternEditor : MonoBehaviour
     private int selectedVertexIndex = -1;
     private int startVertexIndex = -1;
     private int selectedCreaseIndex = -1;
+    private bool suppressNextSceneClick = false;
 
     private Material mountainMat;
     private Material valleyMat;
     private Material boundaryMat;
-    private Material flatMat;
-
-
-    public List<Vector3> currentVertices;
-    public List<OrigamiCrease> currentCreases;
+    private Material highlightCreaseMat;
     #endregion
 
     #region Unity Lifecycle
@@ -144,7 +141,7 @@ public class CreasePatternEditor : MonoBehaviour
         deleteCreaseButton?.onClick.AddListener(() => SetMode(EditorMode.DeleteCrease));
         editCreaseAttrButton?.onClick.AddListener(() => SetMode(EditorMode.EditCreaseAttributes));
         saveButton?.onClick.AddListener(SaveToJson);
-        loadButton?.onClick.AddListener(LoadFromJson);
+        loadButton?.onClick.AddListener(LoadFromJsonOrDxf);
 
         // 使用统一材质初始化逻辑
         InitCreaseMaterials(Color.red, Color.blue);
@@ -181,8 +178,10 @@ public class CreasePatternEditor : MonoBehaviour
         boundaryMat = new Material(shader);
         boundaryMat.color = new Color32(51, 51, 51, 255); // 333333 对应的 255 通道
 
-        flatMat = new Material(shader);
-        flatMat.color = Color.gray;
+        // 折痕选中高亮材质
+        highlightCreaseMat = new Material(shader);
+        highlightCreaseMat.color = Color.yellow;
+
     }
 
     void Update()
@@ -191,8 +190,16 @@ public class CreasePatternEditor : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            Vector3 worldPos = GetMouseWorldPosition();
-            HandleClick(worldPos);
+            if (suppressNextSceneClick)
+            {
+                suppressNextSceneClick = false;
+                return;
+            }
+
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
+
+            HandleClick();
         }
 
         if (currentMode == EditorMode.MoveVertex && selectedVertexIndex >= 0 && Input.GetMouseButton(0))
@@ -211,21 +218,23 @@ public class CreasePatternEditor : MonoBehaviour
         }
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
-        DestroySafe(mountainMat); DestroySafe(valleyMat); DestroySafe(boundaryMat); DestroySafe(flatMat);
+        DestroySafe(mountainMat);
+        DestroySafe(valleyMat);
+        DestroySafe(boundaryMat);
+        DestroySafe(highlightCreaseMat);
     }
 
-    void DestroySafe(Object o) { if (o != null) Destroy(o); }
+    void DestroySafe(UnityEngine.Object o) { if (o != null) Destroy(o); }
     #endregion
 
     #region Mode & UI
     private void SetMode(EditorMode mode)
     {
         currentMode = mode;
+        suppressNextSceneClick = true;
         CancelCurrentOperation();
-        if (creaseAttributePanel != null)
-            creaseAttributePanel.Hide();
         Debug.Log($"[CreaseEditor] 切换模式: {mode}");
     }
 
@@ -236,17 +245,21 @@ public class CreasePatternEditor : MonoBehaviour
             var r = vertexObjects[startVertexIndex]?.GetComponent<Renderer>();
             if (r != null && vertexMaterial != null) r.material = vertexMaterial;
         }
+        DeselectCurrentVertex();
+        DeselectCurrentCrease();
         startVertexIndex = -1;
-        selectedVertexIndex = -1;
-        selectedCreaseIndex = -1;
         if (creaseAttributePanel != null)
             creaseAttributePanel.Hide();
     }
     #endregion
 
     #region Click Handling
-    private void HandleClick(Vector3 worldPos)
+    private void HandleClick()
     {
+        bool snapToGrid = currentMode != EditorMode.DeleteCrease &&
+                          currentMode != EditorMode.EditCreaseAttributes;
+        Vector3 worldPos = GetMouseWorldPosition(snapToGrid);
+
         switch (currentMode)
         {
             case EditorMode.AddVertex:
@@ -306,6 +319,9 @@ public class CreasePatternEditor : MonoBehaviour
 
     private void SelectVertex(Vector3 position)
     {
+        // 先取消之前选中的顶点高亮
+        DeselectCurrentVertex();
+
         selectedVertexIndex = FindNearestVertex(position);
         if (selectedVertexIndex >= 0)
         {
@@ -313,6 +329,29 @@ public class CreasePatternEditor : MonoBehaviour
             var r = vertexObjects[selectedVertexIndex].GetComponent<Renderer>();
             if (r != null) r.material.color = Color.yellow;
         }
+    }
+
+    private void DeselectCurrentVertex()
+    {
+        if (selectedVertexIndex >= 0 && selectedVertexIndex < vertexObjects.Count)
+        {
+            var r = vertexObjects[selectedVertexIndex]?.GetComponent<Renderer>();
+            if (r != null && vertexMaterial != null)
+                r.material.color = vertexMaterial.color;
+        }
+        selectedVertexIndex = -1;
+    }
+
+    private void DeselectCurrentCrease()
+    {
+        if (selectedCreaseIndex >= 0 && selectedCreaseIndex < creaseObjects.Count
+            && selectedCreaseIndex < creases.Count)
+        {
+            var lr = creaseObjects[selectedCreaseIndex]?.GetComponent<LineRenderer>();
+            if (lr != null)
+                lr.material = ChooseCreaseMaterial(creases[selectedCreaseIndex]);
+        }
+        selectedCreaseIndex = -1;
     }
 
     private void MoveSelectedVertex(Vector3 position)
@@ -443,7 +482,7 @@ public class CreasePatternEditor : MonoBehaviour
         }
 
         // FIX: 用枚举设置类型（替代布尔字段）
-        CreaseType type = CreaseType.Flat;
+        CreaseType type = CreaseType.Boundary;
         if (mountainToggle != null && mountainToggle.isOn) type = CreaseType.Mountain;
         else if (valleyToggle != null && valleyToggle.isOn) type = CreaseType.Valley;
         else if (boundaryToggle != null && boundaryToggle.isOn) type = CreaseType.Boundary;
@@ -480,7 +519,7 @@ public class CreasePatternEditor : MonoBehaviour
             case CreaseType.Mountain: return mountainMat;
             case CreaseType.Valley: return valleyMat;
             case CreaseType.Boundary: return boundaryMat;
-            default: return flatMat;
+            default: return boundaryMat;
         }
     }
 
@@ -566,11 +605,20 @@ public class CreasePatternEditor : MonoBehaviour
         int cIdx = FindNearestCreaseIndex(clickPos, Mathf.Max(creaseWidth * 2f, 0.12f));
         if (cIdx < 0)
         {
+            DeselectCurrentCrease();
             Debug.Log("[CreaseEditor] 未找到附近折痕以编辑");
             return;
         }
 
+        // 高亮选中的折痕
+        DeselectCurrentCrease();
         selectedCreaseIndex = cIdx;
+        if (cIdx < creaseObjects.Count)
+        {
+            var lr = creaseObjects[cIdx].GetComponent<LineRenderer>();
+            if (lr != null) lr.material = highlightCreaseMat;
+        }
+
         var c = creases[cIdx];
 
         if (creaseAttributePanel != null)
@@ -581,20 +629,27 @@ public class CreasePatternEditor : MonoBehaviour
 
                 // 调用支持 min/max 的更新方法
                 UpdateCreaseAttributes(c.id, newType, minAngle: newMinAngle, maxAngle: newMaxAngle);
+                // Apply 后清除高亮
+                DeselectCurrentCrease();
+            },
+            onCancel: () =>
+            {
+                // Cancel 时清除高亮
+                DeselectCurrentCrease();
             });
         }
 
         else
         {
-            // 旧版：直接用Toggle设置类型
-            CreaseType type = CreaseType.Flat;
+            // 降级模式：无属性面板时，仅通过全局 Toggle 修改折痕类型（保持原有 min/max angle）
+            Debug.LogWarning("[CreaseEditor] 未绑定 creaseAttributePanel，仅支持修改折痕类型，角度保持原值。");
+            CreaseType type = CreaseType.Boundary;
             if (mountainToggle != null && mountainToggle.isOn) type = CreaseType.Mountain;
             else if (valleyToggle != null && valleyToggle.isOn) type = CreaseType.Valley;
             else if (boundaryToggle != null && boundaryToggle.isOn) type = CreaseType.Boundary;
 
             c.creaseType = type;
-            if (cIdx < creaseObjects.Count)
-                creaseObjects[cIdx].GetComponent<LineRenderer>().material = ChooseCreaseMaterial(c);
+            UpdateCreaseVisual(cIdx);
         }
     }
 
@@ -613,6 +668,7 @@ public class CreasePatternEditor : MonoBehaviour
                 c.creaseType = newType;
                 c.minAngle = minAngle;
                 c.maxAngle = maxAngle;
+                c.angle = minAngle;
 
                 // 可选：如果需要同步 angle 字段（例如取中间值）
                 // c.angle = Mathf.Clamp(c.angle, minAngle, maxAngle);
@@ -676,15 +732,12 @@ public class CreasePatternEditor : MonoBehaviour
                 case CreaseType.Boundary:
                     mappedType = global::OrigamiCrease.Type.Boundary;
                     break;
-                case CreaseType.Flat:
-                    mappedType = global::OrigamiCrease.Type.Valley; // Flat 作为普通折痕显示
-                    break;
             }
 
             // 采用 angle 作为 restAngle，提供宽泛的限位与默认刚度
-            float rest = c.angle;
-            float min = rest - 180f;
-            float max = rest + 180f;
+            float rest = c.minAngle;
+            float min = c.minAngle;
+            float max = c.maxAngle;
             float stiff = 1.0f;
 
             var outC = new global::OrigamiCrease
@@ -718,9 +771,15 @@ public class CreasePatternEditor : MonoBehaviour
         // ---------------------------
         // 5. 构建 OrigamiData.OrigamiModel
         // ---------------------------
+        string fileName = NormalizeModelFileName(fileNameInput?.text);
+        if (string.IsNullOrEmpty(fileName))
+            return;
+
+        string modelName = Path.GetFileNameWithoutExtension(fileName);
+
         global::OrigamiModel model = new global::OrigamiModel
         {
-            name = string.IsNullOrEmpty(fileNameInput?.text) ? "CustomPattern" : fileNameInput.text,
+            name = modelName,
             description = "Point-edge based crease pattern",
 
             vertices = outVertices,
@@ -753,7 +812,7 @@ public class CreasePatternEditor : MonoBehaviour
             if (!Directory.Exists(modelsDir))
                 Directory.CreateDirectory(modelsDir);
 
-            string path = Path.Combine(modelsDir, $"{model.name}.json");
+            string path = Path.Combine(modelsDir, fileName);
             string json = JsonUtility.ToJson(model, true);
 
             File.WriteAllText(path, json);
@@ -767,6 +826,39 @@ public class CreasePatternEditor : MonoBehaviour
     }
 
 
+    private string NormalizeModelFileName(string rawName)
+    {
+        string name = string.IsNullOrWhiteSpace(rawName) ? "CustomPattern" : rawName.Trim();
+        if (name.EndsWith(".json", System.StringComparison.OrdinalIgnoreCase))
+            name = name.Substring(0, name.Length - ".json".Length);
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Debug.LogError("[CreaseEditor] 文件名不能为空。");
+            return null;
+        }
+
+        for (int i = 0; i < name.Length; i++)
+        {
+            char ch = name[i];
+            bool allowed =
+                (ch >= 'a' && ch <= 'z') ||
+                (ch >= 'A' && ch <= 'Z') ||
+                (ch >= '0' && ch <= '9') ||
+                ch == '_' ||
+                ch == '-';
+
+            if (!allowed)
+            {
+                Debug.LogError("[CreaseEditor] 文件名只支持英文字母、数字、下划线和短横线。");
+                return null;
+            }
+        }
+
+        return name + ".json";
+    }
+
+
     private void LoadFromJson()
     {
         string fileName = loadFileInput != null ? loadFileInput.text.Trim() : "";
@@ -777,25 +869,67 @@ public class CreasePatternEditor : MonoBehaviour
             return;
         }
 
-        ClearAll();
-
-        string jsonFullPath;
-        if (Path.IsPathRooted(fileName))
-        {
-            jsonFullPath = fileName;
-        }
-        else
-        {
-            jsonFullPath = Path.Combine(Application.dataPath, "Models", fileName);
-        }
-
+        string jsonFullPath = ResolveFilePath(fileName);
         if (!File.Exists(jsonFullPath))
         {
             Debug.LogError($"❌ JSON 文件不存在: {jsonFullPath}");
             return;
         }
 
-        string json = File.ReadAllText(jsonFullPath);
+        ClearAll();
+        LoadModelFromJsonFile(jsonFullPath);
+    }
+
+    /// <summary>
+    /// 从 JSON 或 DXF 文件加载折痕图案。
+    /// 如果是 DXF 文件，会自动调用 DxfToOrigamiConverter 转换为 JSON 后再加载。
+    /// </summary>
+    private void LoadFromJsonOrDxf()
+    {
+        string fileName = loadFileInput != null ? loadFileInput.text.Trim() : "";
+
+        if (string.IsNullOrEmpty(fileName))
+        {
+            Debug.LogWarning("[CreaseEditor] 请输入文件名，例如 mypattern.json 或 mypattern.dxf");
+            return;
+        }
+
+        string fullPath = ResolveFilePath(fileName);
+        if (!File.Exists(fullPath))
+        {
+            Debug.LogError($"❌ 文件不存在: {fullPath}");
+            return;
+        }
+
+        ClearAll();
+
+        // DXF → JSON 自动转换
+        if (fullPath.EndsWith(".dxf", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!TryConvertDxfToJson(ref fullPath))
+            {
+                Debug.LogError("❌ DXF 转换失败，请确认文件格式正确");
+                return;
+            }
+        }
+
+        LoadModelFromJsonFile(fullPath);
+    }
+
+    /// <summary>将文件名解析为完整路径</summary>
+    private string ResolveFilePath(string fileName)
+    {
+        if (Path.IsPathRooted(fileName))
+            return fileName;
+        return Path.Combine(Application.dataPath, "Models", fileName);
+    }
+
+    /// <summary>
+    /// 从 JSON 文件加载模型数据（vertices + creases）
+    /// </summary>
+    private void LoadModelFromJsonFile(string jsonPath)
+    {
+        string json = File.ReadAllText(jsonPath);
         global::OrigamiModel gModel = JsonUtility.FromJson<global::OrigamiModel>(json);
 
         if (gModel == null)
@@ -847,7 +981,7 @@ public class CreasePatternEditor : MonoBehaviour
                     v1 = gc.v1,
                     v2 = gc.v2,
                     creaseType = type,
-                    angle = gc.restAngle,
+                    angle = gc.minAngle,
                     width = gc.width,
                     minAngle = gc.minAngle,
                     maxAngle = gc.maxAngle
@@ -867,12 +1001,60 @@ public class CreasePatternEditor : MonoBehaviour
             }
         }
 
-        currentVertices = vertices.Select(v => new Vector3(v.x, v.y, v.z)).ToList();
-        currentCreases = new List<OrigamiCrease>(creases);
-
         Debug.Log($"✅ 数据加载完成: 顶点数={vertices.Count}, 折痕数={creases.Count}");
     }
 
+#if UNITY_EDITOR
+    /// <summary>
+    /// 将 DXF 文件转换为 JSON 文件。直接调用 DxfToJsonConverter。
+    /// </summary>
+    private static bool TryConvertDxfToJson(ref string filePath)
+    {
+        if (!filePath.EndsWith(".dxf", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        try
+        {
+            string dir = Path.GetDirectoryName(filePath);
+            string name = Path.GetFileNameWithoutExtension(filePath);
+
+            // 直接调用 DxfToJsonConverter（无需反射）
+            if (!DxfToJsonConverter.Convert(filePath, dir, name))
+            {
+                Debug.LogError("[CreaseEditor] DXF 转换失败，请确认文件格式正确");
+                return false;
+            }
+
+            filePath = Path.Combine(dir, name + ".json");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[CreaseEditor] DXF 转换失败: {e.Message}");
+            return false;
+        }
+    }
+#endif
+
+    public List<Vector3> GetCurrentVertices()
+    {
+        return vertices.Select(v => new Vector3(v.x, v.y, v.z)).ToList();
+    }
+
+    public List<OrigamiCrease> GetCurrentCreases()
+    {
+        return creases.Select(c => new OrigamiCrease
+        {
+            id = c.id,
+            v1 = c.v1,
+            v2 = c.v2,
+            creaseType = c.creaseType,
+            angle = c.angle,
+            width = c.width,
+            minAngle = c.minAngle,
+            maxAngle = c.maxAngle
+        }).ToList();
+    }
 
 
     private void ClearAll()
@@ -890,14 +1072,14 @@ public class CreasePatternEditor : MonoBehaviour
     #endregion
 
     #region Helpers
-    private Vector3 GetMouseWorldPosition()
+    private Vector3 GetMouseWorldPosition(bool snapToGrid = true)
     {
         Ray ray = editorCamera.ScreenPointToRay(Input.mousePosition);
         if (new Plane(Vector3.up, Vector3.zero).Raycast(ray, out float distance))
         {
             Vector3 worldPos = ray.GetPoint(distance);
             worldPos.y = 0f;
-            if (gridSize > 0)
+            if (snapToGrid && gridSize > 0)
             {
                 worldPos.x = Mathf.Round(worldPos.x / gridSize) * gridSize;
                 worldPos.z = Mathf.Round(worldPos.z / gridSize) * gridSize;

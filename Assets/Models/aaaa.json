@@ -1,5 +1,5 @@
 {
-    "name": "CustomPattern",
+    "name": "aaaa",
     "description": "Point-edge based crease pattern",
     "vertices": [
         {
@@ -51,21 +51,6 @@
             "x": -8.0,
             "y": 0.0,
             "z": -4.0
-        },
-        {
-            "x": -5.0,
-            "y": 0.0,
-            "z": -12.0
-        },
-        {
-            "x": -2.0,
-            "y": 0.0,
-            "z": -13.0
-        },
-        {
-            "x": 0.0,
-            "y": 0.0,
-            "z": -13.0
         }
     ],
     "faces": [
@@ -148,46 +133,6 @@
             ],
             "rigid": false,
             "color": "#FFFFFF"
-        },
-        {
-            "id": 9,
-            "vertices": [
-                7,
-                9,
-                13
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
-        },
-        {
-            "id": 10,
-            "vertices": [
-                9,
-                8,
-                11
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
-        },
-        {
-            "id": 11,
-            "vertices": [
-                12,
-                13,
-                9
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
-        },
-        {
-            "id": 12,
-            "vertices": [
-                11,
-                12,
-                9
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
         }
     ],
     "creases": [
@@ -239,7 +184,7 @@
             "id": 5,
             "v1": 2,
             "v2": 9,
-            "type": 0,
+            "type": 2,
             "restAngle": 0.0,
             "minAngle": 0.0,
             "maxAngle": 180.0,
@@ -316,7 +261,7 @@
             "id": 12,
             "v1": 7,
             "v2": 9,
-            "type": 0,
+            "type": 2,
             "restAngle": 0.0,
             "minAngle": 0.0,
             "maxAngle": 180.0,
@@ -327,7 +272,7 @@
             "id": 13,
             "v1": 9,
             "v2": 8,
-            "type": 1,
+            "type": 2,
             "restAngle": 0.0,
             "minAngle": 0.0,
             "maxAngle": 180.0,
@@ -371,84 +316,7 @@
             "id": 17,
             "v1": 2,
             "v2": 6,
-            "type": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 18,
-            "v1": 13,
-            "v2": 7,
             "type": 2,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 19,
-            "v1": 13,
-            "v2": 12,
-            "type": 2,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 20,
-            "v1": 11,
-            "v2": 12,
-            "type": 2,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 21,
-            "v1": 11,
-            "v2": 8,
-            "type": 2,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 22,
-            "v1": 11,
-            "v2": 9,
-            "type": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 23,
-            "v1": 13,
-            "v2": 9,
-            "type": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 24,
-            "v1": 9,
-            "v2": 12,
-            "type": 1,
             "restAngle": 0.0,
             "minAngle": 0.0,
             "maxAngle": 180.0,

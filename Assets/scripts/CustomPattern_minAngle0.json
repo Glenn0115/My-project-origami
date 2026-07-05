@@ -1,0 +1,340 @@
+﻿{
+    "name":  "CustomPattern_minAngle0",
+    "description":  "Point-edge based crease pattern",
+    "vertices":  [
+                     {
+                         "x":  2.0,
+                         "y":  0.0,
+                         "z":  0.0
+                     },
+                     {
+                         "x":  2.0,
+                         "y":  0.0,
+                         "z":  -4.0
+                     },
+                     {
+                         "x":  -2.0,
+                         "y":  0.0,
+                         "z":  0.0
+                     },
+                     {
+                         "x":  -6.0,
+                         "y":  0.0,
+                         "z":  0.0
+                     },
+                     {
+                         "x":  -8.0,
+                         "y":  0.0,
+                         "z":  0.0
+                     },
+                     {
+                         "x":  2.0,
+                         "y":  0.0,
+                         "z":  -8.0
+                     },
+                     {
+                         "x":  2.0,
+                         "y":  0.0,
+                         "z":  -10.0
+                     },
+                     {
+                         "x":  -8.0,
+                         "y":  0.0,
+                         "z":  -10.0
+                     },
+                     {
+                         "x":  -2.0,
+                         "y":  0.0,
+                         "z":  -10.0
+                     },
+                     {
+                         "x":  -8.0,
+                         "y":  0.0,
+                         "z":  -4.0
+                     }
+                 ],
+    "faces":  [
+                  {
+                      "id":  1,
+                      "vertices":  [
+                                       3,
+                                       8,
+                                       2
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  },
+                  {
+                      "id":  2,
+                      "vertices":  [
+                                       8,
+                                       3,
+                                       10
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  },
+                  {
+                      "id":  3,
+                      "vertices":  [
+                                       3,
+                                       2,
+                                       1
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  },
+                  {
+                      "id":  4,
+                      "vertices":  [
+                                       9,
+                                       6,
+                                       2
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  },
+                  {
+                      "id":  5,
+                      "vertices":  [
+                                       6,
+                                       9,
+                                       7
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  },
+                  {
+                      "id":  6,
+                      "vertices":  [
+                                       10,
+                                       4,
+                                       5
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  },
+                  {
+                      "id":  7,
+                      "vertices":  [
+                                       4,
+                                       10,
+                                       3
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  },
+                  {
+                      "id":  8,
+                      "vertices":  [
+                                       9,
+                                       2,
+                                       8
+                                   ],
+                      "rigid":  false,
+                      "color":  "#FFFFFF"
+                  }
+              ],
+    "creases":  [
+                    {
+                        "id":  1,
+                        "v1":  3,
+                        "v2":  8,
+                        "type":  1,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  2,
+                        "v1":  3,
+                        "v2":  2,
+                        "type":  1,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  3,
+                        "v1":  9,
+                        "v2":  6,
+                        "type":  1,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  4,
+                        "v1":  10,
+                        "v2":  4,
+                        "type":  1,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  5,
+                        "v1":  2,
+                        "v2":  9,
+                        "type":  0,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  6,
+                        "v1":  10,
+                        "v2":  3,
+                        "type":  0,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  7,
+                        "v1":  5,
+                        "v2":  4,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  8,
+                        "v1":  4,
+                        "v2":  3,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  9,
+                        "v1":  3,
+                        "v2":  1,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  10,
+                        "v1":  1,
+                        "v2":  2,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  11,
+                        "v1":  6,
+                        "v2":  7,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  12,
+                        "v1":  7,
+                        "v2":  9,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  13,
+                        "v1":  9,
+                        "v2":  8,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  14,
+                        "v1":  8,
+                        "v2":  10,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  15,
+                        "v1":  10,
+                        "v2":  5,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  16,
+                        "v1":  8,
+                        "v2":  2,
+                        "type":  1,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    },
+                    {
+                        "id":  17,
+                        "v1":  2,
+                        "v2":  6,
+                        "type":  2,
+                        "restAngle":  0.0,
+                        "minAngle":  0,
+                        "maxAngle":  180.0,
+                        "stiffness":  1.0,
+                        "width":  0.05000000074505806
+                    }
+                ],
+    "connections":  [
+
+                    ],
+    "material":  {
+                     "name":  "default",
+                     "metallic":  0.0,
+                     "smoothness":  0.5,
+                     "doubleSided":  true
+                 },
+    "defaultCreaseWidth":  0.05000000074505806,
+    "mountainCreaseColor":  "#FF0000",
+    "valleyCreaseColor":  "#0000FF",
+    "boundaryCreaseColor":  "#000000"
+}
