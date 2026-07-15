@@ -1001,7 +1001,10 @@ public class CreasePatternEditor : MonoBehaviour
             }
         }
 
-        Debug.Log($"✅ 数据加载完成: 顶点数={vertices.Count}, 折痕数={creases.Count}");
+        int mountainCount = creases.Count(c => c.creaseType == CreaseType.Mountain);
+        int valleyCount   = creases.Count(c => c.creaseType == CreaseType.Valley);
+        int boundaryCount = creases.Count(c => c.creaseType == CreaseType.Boundary);
+        Debug.Log($"✅ 数据加载完成: 顶点数={vertices.Count}, 折痕数={creases.Count} (Mountain:{mountainCount} Valley:{valleyCount} Boundary:{boundaryCount})");
     }
 
 #if UNITY_EDITOR

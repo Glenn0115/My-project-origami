@@ -1,0 +1,392 @@
+{
+    "name": "7_5",
+    "description": "Point-edge based crease pattern",
+    "vertices": [
+        {
+            "x": 44.87818908691406,
+            "y": 0.0,
+            "z": 7.78582763671875
+        },
+        {
+            "x": 28.406524658203126,
+            "y": 0.0,
+            "z": -7.113426208496094
+        },
+        {
+            "x": 7.985931396484375,
+            "y": 0.0,
+            "z": 43.55542755126953
+        },
+        {
+            "x": 15.566879272460938,
+            "y": 0.0,
+            "z": 40.190521240234378
+        },
+        {
+            "x": 2.4220123291015627,
+            "y": 0.0,
+            "z": 49.706539154052737
+        },
+        {
+            "x": 6.206695556640625,
+            "y": 0.0,
+            "z": -7.799583435058594
+        },
+        {
+            "x": -17.81439971923828,
+            "y": 0.0,
+            "z": -5.385498046875
+        },
+        {
+            "x": 38.45008850097656,
+            "y": 0.0,
+            "z": -49.70653533935547
+        },
+        {
+            "x": 73.33905029296875,
+            "y": 0.0,
+            "z": -33.404701232910159
+        },
+        {
+            "x": -0.857147216796875,
+            "y": 0.0,
+            "z": -46.81182098388672
+        },
+        {
+            "x": -38.037628173828128,
+            "y": 0.0,
+            "z": -41.46784210205078
+        },
+        {
+            "x": -73.33905029296875,
+            "y": 0.0,
+            "z": -19.9481201171875
+        },
+        {
+            "x": -37.68670654296875,
+            "y": 0.0,
+            "z": 8.323356628417969
+        }
+    ],
+    "faces": [
+        {
+            "id": 1,
+            "vertices": [
+                1,
+                2,
+                8,
+                9
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 2,
+            "vertices": [
+                2,
+                1,
+                4,
+                3
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 3,
+            "vertices": [
+                3,
+                5,
+                7,
+                6
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 4,
+            "vertices": [
+                6,
+                7,
+                11,
+                10
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 5,
+            "vertices": [
+                10,
+                8,
+                2,
+                6
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 6,
+            "vertices": [
+                12,
+                11,
+                7,
+                13
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 7,
+            "vertices": [
+                2,
+                3,
+                6
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 8,
+            "vertices": [
+                7,
+                5,
+                13
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        }
+    ],
+    "creases": [
+        {
+            "id": 1,
+            "v1": 1,
+            "v2": 2,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 2,
+            "v1": 3,
+            "v2": 4,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 3,
+            "v1": 5,
+            "v2": 3,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 4,
+            "v1": 6,
+            "v2": 7,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 5,
+            "v1": 8,
+            "v2": 9,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 6,
+            "v1": 10,
+            "v2": 8,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 7,
+            "v1": 11,
+            "v2": 10,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 8,
+            "v1": 12,
+            "v2": 11,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 9,
+            "v1": 1,
+            "v2": 9,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 10,
+            "v1": 2,
+            "v2": 8,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 11,
+            "v1": 6,
+            "v2": 10,
+            "type": 0,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 12,
+            "v1": 7,
+            "v2": 11,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 13,
+            "v1": 13,
+            "v2": 12,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 14,
+            "v1": 4,
+            "v2": 1,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 15,
+            "v1": 3,
+            "v2": 2,
+            "type": 0,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 16,
+            "v1": 5,
+            "v2": 7,
+            "type": 0,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 17,
+            "v1": 5,
+            "v2": 13,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 18,
+            "v1": 3,
+            "v2": 6,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 19,
+            "v1": 13,
+            "v2": 7,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        },
+        {
+            "id": 20,
+            "v1": 6,
+            "v2": 2,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 180.0,
+            "stiffness": 1.0,
+            "width": 0.019999999552965165
+        }
+    ],
+    "connections": [],
+    "material": {
+        "name": "default",
+        "metallic": 0.0,
+        "smoothness": 0.5,
+        "doubleSided": true
+    },
+    "defaultCreaseWidth": 0.05000000074505806,
+    "mountainCreaseColor": "#FF0000",
+    "valleyCreaseColor": "#0000FF",
+    "boundaryCreaseColor": "#000000"
+}

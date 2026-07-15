@@ -5088,7 +5088,7 @@ MonoBehaviour:
   rotateButton: 1
   zoomSpeed: 10
   minZoomDistance: 1
-  maxZoomDistance: 20
+  maxZoomDistance: 200
   panSpeed: 2
   panButton: 2
   resetKey: 278
