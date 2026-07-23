@@ -859,26 +859,6 @@ public class CreasePatternEditor : MonoBehaviour
     }
 
 
-    private void LoadFromJson()
-    {
-        string fileName = loadFileInput != null ? loadFileInput.text.Trim() : "";
-
-        if (string.IsNullOrEmpty(fileName))
-        {
-            Debug.LogWarning("[CreaseEditor] 请输入 JSON 文件名，例如 mypattern.json");
-            return;
-        }
-
-        string jsonFullPath = ResolveFilePath(fileName);
-        if (!File.Exists(jsonFullPath))
-        {
-            Debug.LogError($"❌ JSON 文件不存在: {jsonFullPath}");
-            return;
-        }
-
-        ClearAll();
-        LoadModelFromJsonFile(jsonFullPath);
-    }
 
     /// <summary>
     /// 从 JSON 或 DXF 文件加载折痕图案。
