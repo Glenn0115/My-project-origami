@@ -1,0 +1,270 @@
+交付目录当前拒绝创建该文件，因此我改为直接在这里给出可执行版本；内容不依赖任何尚未验证的项目改动。下面是周末可执行的方案。目标是继续用 Unity 物理引擎，但将“全部铰链强驱动”改成“少数主动驱动 + 多数被动约束 + 实时失稳告警”。
+
+## 目标
+
+- 保留所有内部折痕的 `HingeJoint`，避免欠约束。
+- 只让少数铰链强力驱动，避免闭环里所有关节互相争夺。
+- 依据真实接缝误差自动降速或暂停。
+- 用户遇到复杂模型时得到警告，而非无提示裂开。
+
+## 周末执行顺序
+
+### 1. 先建立基线
+
+选 3 个模型：
+
+| 模型 | 内部铰链数 | 首次裂开时的 `foldProgress` | 最大接缝误差 |
+|---|---:|---:|---:|
+| 少量折痕 |  |  |  |
+| 中等折痕 |  |  |  |
+| 闭环/高折痕 |  |  |  |
+
+从 `foldProgress = 0` 匀速推进到 `1`，记录何时第一次出现裂缝。这是后续判断改进是否有效的依据。
+
+### 2. 修正每条铰链的两端锚点
+
+在 `OrigamiLoader.CreateCreasesAndConnections()` 创建铰链的位置，显式设置两个锚点：
+
+```csharp
+hinge.connectedBody = connectedRb;
+hinge.autoConfigureConnectedAnchor = false;
+
+hinge.anchor =
+    hingeOwner.transform.InverseTransformPoint(hingePoint);
+
+hinge.connectedAnchor =
+    connectedRb.transform.InverseTransformPoint(hingePoint);
+
+hinge.axis = hingeOwner.transform
+    .InverseTransformDirection(creaseDir)
+    .normalized;
+```
+
+这是第一优先级。否则 Unity 自动计算 `connectedAnchor`，折痕一多时误差容易被放大。
+
+验收：初始平面状态下，所有内部铰链的两端应重合或非常接近。
+
+### 3. 把铰链分成“驱动”和“从动”
+
+新增组件 `OrigamiHingeInfo.cs`：
+
+```csharp
+using UnityEngine;
+
+public sealed class OrigamiHingeInfo : MonoBehaviour
+{
+    public HingeJoint hinge;
+    public int creaseId;
+    public bool isDriver;
+    [Range(0f, 1f)] public float driveWeight = 1f;
+}
+```
+
+每条内部折痕仍有 `HingeJoint`，区别只在驱动强度：
+
+| 类型 | 是否有 `HingeJoint` | 弹簧刚度 | 阻尼 | 作用 |
+|---|---|---:|---:|---|
+| 驱动铰链 | 是 | 40–80 | 8–12 | 主动推进折叠 |
+| 从动铰链 | 是 | 1–5 | 12–20 | 保持连接并缓慢协调 |
+| 边界折痕 | 否 | 0 | 0 | 不创建铰链 |
+
+初版原则：
+
+- 没有闭环的折痕链，可全部作为驱动，但需慢速推进。
+- 每个闭环连通区域，只手动选 `1–3` 条驱动折痕。
+- 其他内部折痕全部设为从动。
+
+驱动折痕尽量选靠近固定根面、且彼此不直接组成闭环的一组。
+
+### 4. 使用主从弹簧参数
+
+创建铰链时按角色设置：
+
+```csharp
+float stiffness = isDriver ? 60f : 3f;
+float damping = isDriver ? 10f : 16f;
+
+hinge.useLimits = true;
+hinge.useSpring = true;
+
+hinge.spring = new JointSpring
+{
+    spring = stiffness,
+    damper = damping,
+    targetPosition = crease.restAngle
+};
+```
+
+所有内部铰链仍然保留 `useLimits = true`。这防止欠约束；从动铰链只是降低“必须立刻达到某个角度”的强制程度。
+
+另外，必须确保山折与谷折的范围方向不同。例如：
+
+```text
+山折：0° 至 +180°
+谷折：-180° 至 0°
+```
+
+不要继续给所有铰链相同的默认范围。
+
+### 5. 不让滑条直接瞬移目标角度
+
+目前滑条若直接对每个铰链写入目标角度，闭环会在一个物理帧内受到大量冲突驱动。
+
+改为保存用户请求进度，再在 `FixedUpdate()` 中逐步推进：
+
+```csharp
+public float requestedFoldProgress;
+public float maxDriverAngleSpeed = 20f;
+```
+
+```csharp
+private void FixedUpdate()
+{
+    float speed = maxDriverAngleSpeed;
+
+    if (physicsMonitor.CurrentState == PhysicsHealthState.Warning)
+        speed *= 0.25f;
+
+    if (physicsMonitor.CurrentState == PhysicsHealthState.Danger)
+        return;
+
+    foreach (OrigamiHingeInfo info in hingeInfos)
+    {
+        HingeJoint hinge = info.hinge;
+        if (hinge == null) continue;
+
+        JointSpring spring = hinge.spring;
+        float requestedAngle = Mathf.Lerp(
+            hinge.limits.min,
+            hinge.limits.max,
+            requestedFoldProgress);
+
+        if (info.isDriver)
+        {
+            spring.targetPosition = Mathf.MoveTowards(
+                spring.targetPosition,
+                requestedAngle,
+                speed * info.driveWeight * Time.fixedDeltaTime);
+        }
+        else
+        {
+            // 从动铰链只慢速给出偏好，允许闭环协调。
+            spring.targetPosition = Mathf.Lerp(
+                spring.targetPosition,
+                requestedAngle,
+                0.02f);
+        }
+
+        hinge.spring = spring;
+    }
+}
+```
+
+初始建议 `maxDriverAngleSpeed = 20` 度/秒。复杂模型先试 `10` 度/秒。
+
+### 6. 添加接缝误差监测
+
+监测器每 `0.2` 秒计算每条铰链两端在世界坐标中的距离：
+
+```csharp
+Vector3 ownerPoint =
+    hinge.transform.TransformPoint(hinge.anchor);
+
+Vector3 connectedPoint =
+    hinge.connectedBody.transform.TransformPoint(
+        hinge.connectedAnchor);
+
+float separation =
+    Vector3.Distance(ownerPoint, connectedPoint);
+```
+
+监测器至少公开：
+
+```csharp
+public enum PhysicsHealthState
+{
+    Normal,
+    Warning,
+    Danger
+}
+
+public PhysicsHealthState CurrentState { get; private set; }
+public float MaxSeparation { get; private set; }
+public int HingeCount { get; private set; }
+```
+
+第一轮阈值，假定 Unity `1` 单位代表 `1` 米：
+
+| 状态 | 条件 | 系统动作 |
+|---|---|---|
+| 正常 | 最大接缝 `< 0.005` | 正常推进 |
+| 警告 | `0.005–0.02`，或铰链 `>= 12` | 黄色提示，推进速度降为 25% |
+| 危险 | 最大接缝 `>= 0.02`，或铰链 `>= 20` | 红色提示，停止推进 |
+
+铰链数只是复杂度提示。是否真的失稳应以接缝误差和持续高角速度为准。
+
+### 7. 保存最后稳定状态
+
+只在物理状态正常时保存稳定进度：
+
+```csharp
+if (physicsMonitor.CurrentState == PhysicsHealthState.Normal)
+{
+    lastStableFoldProgress = currentFoldProgress;
+}
+```
+
+出现危险状态：
+
+```csharp
+if (physicsMonitor.CurrentState == PhysicsHealthState.Danger)
+{
+    requestedFoldProgress = lastStableFoldProgress;
+
+    ShowWarning(
+        "该折叠状态无法稳定闭合，已暂停在最后稳定位置。");
+}
+```
+
+第一版建议只“暂停”，不要自动回退。因为立即回退可能在已有震荡时制造新的冲击。暂停稳定后，再做低速回退。
+
+### 8. 物理参数与碰撞对照
+
+每个面创建刚体后先试：
+
+```csharp
+rb.solverIterations = 12;
+rb.solverVelocityIterations = 8;
+rb.interpolation = RigidbodyInterpolation.Interpolate;
+```
+
+每个连通折纸区域选择一个根面：
+
+```csharp
+rootRigidbody.isKinematic = true;
+```
+
+只固定一个根面。固定多个面会重新引入强制闭环约束。
+
+碰撞分两轮测：
+
+1. 临时关闭 `CreateFaceColliderChildren()`，只验证主从驱动是否稳定。
+2. 恢复碰撞后，为相邻面、同一面内三角形禁用相互碰撞，避免它们互相推开。
+
+## 验收条件
+
+本轮不追求复杂折纸严格闭合，只要求：
+
+- 简单模型完整折叠无可见裂缝。
+- 中等模型的最大接缝误差比基线低，且没有持续抖动。
+- 高复杂模型在明显裂开前显示黄色提示。
+- 超过阈值时显示红色提示并暂停。
+- 控制台记录模型名、内部铰链数、最大接缝误差、当前状态，便于下一轮调参。
+
+## 遇到问题时的排查顺序
+
+1. 初始平面已有接缝：检查 `connectedAnchor`、折痕端点索引、面邻接关系。
+2. 关闭碰撞后显著变好：先处理相邻面碰撞屏蔽。
+3. 仅快速滑动时失稳：降低 `maxDriverAngleSpeed`。
+4. 慢速仍失稳：减少驱动铰链数量，降低驱动刚度，提高从动阻尼。
+5. 某个闭环模型始终失稳：它可能不满足当前默认角度组合的刚性闭合条件。保留警告和暂停，将其作为物理模式的已知边界。
