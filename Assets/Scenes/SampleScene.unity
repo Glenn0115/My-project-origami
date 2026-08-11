@@ -1083,6 +1083,7 @@ MonoBehaviour:
   useCustomColors: 1
   creaseMaterial: {fileID: 2100000, guid: dc6a09eac175ca4428c70d728fb93a21, type: 2}
   colliderThickness: 0.01
+  useSingleColliderForConvexFace: 1
   modelNameText: {fileID: 0}
   modelDescriptionText: {fileID: 0}
 --- !u!4 &239768127
@@ -1109,7 +1110,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 239768124}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2566c18d3d2de104794bf86579515f72, type: 3}
+  m_Script: {fileID: 11500000, guid: 61a784cc003db4146b2814c9370b1ae4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pathInputField: {fileID: 618333007}

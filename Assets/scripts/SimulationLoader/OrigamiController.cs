@@ -1,21 +1,28 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
-// 注意：移除了 UnityEditor 命名空间引用，避免运行时报错
+// Coordinates all hinge drives while leaving every HingeJoint in the model.
 public class OrigamiController : MonoBehaviour
 {
-    private List<HingeJoint> hinges = new List<HingeJoint>();
+    private readonly List<HingeJoint> hinges = new List<HingeJoint>();
+    private readonly List<OrigamiHingeInfo> hingeInfos = new List<OrigamiHingeInfo>();
+
     public float foldSpeed = 30f;
     public float rotationSpeed = 50f;
     public bool enableKeyboardRotation = false;
     public List<HingeJoint> GetHinges() { return hinges; }
 
-
-    [Header("折叠状态")]
+    [Header("Fold State")]
     [Range(0f, 1f)]
     public float foldProgress = 0f;
-    private float lastFoldProgress = 0f;
+    [Tooltip("Maximum target-angle speed for driver hinges, in degrees per second.")]
+    public float maxDriverAngleSpeed = 20f;
+    [Tooltip("Maximum target-angle speed for follower hinges, in degrees per second.")]
+    public float maxFollowerAngleSpeed = 8f;
+    [Range(0.05f, 1f)]
+    public float warningSpeedMultiplier = 0.25f;
+    public bool pauseOnDanger = true;
 
     [Header("Torque Auto Fold")]
     public bool autoFoldToMaxOnStart = false;
@@ -27,97 +34,186 @@ public class OrigamiController : MonoBehaviour
     public float torqueAutoFoldStallSeconds = 0.5f;
     public float torqueAutoFoldMinRunTime = 0.25f;
     public bool disableSpringDuringTorqueAutoFold = true;
-    private bool torqueAutoFoldActive = false;
-    private float torqueAutoFoldElapsed = 0f;
-    private Dictionary<HingeJoint, float> torqueAutoFoldLastAngles = new Dictionary<HingeJoint, float>();
-    private Dictionary<HingeJoint, float> torqueAutoFoldStableTimes = new Dictionary<HingeJoint, float>();
-    private HashSet<HingeJoint> torqueAutoFoldStoppedHinges = new HashSet<HingeJoint>();
 
-    // 修复：跨环境通用的关节有效性判断（无需 EditorUtility）
-    // 原理：Unity 中销毁的对象实例ID为 0，且 == null 会返回 true（异步销毁后可能延迟，但结合实例ID可覆盖绝大多数情况）
+    private float requestedFoldProgress;
+    private float appliedFoldProgress;
+    private float lastFoldProgress;
+    private float lastStableFoldProgress;
+    private bool dangerPauseApplied;
+
+    private bool torqueAutoFoldActive;
+    private float torqueAutoFoldElapsed;
+    private readonly Dictionary<HingeJoint, float> torqueAutoFoldLastAngles = new Dictionary<HingeJoint, float>();
+    private readonly Dictionary<HingeJoint, float> torqueAutoFoldStableTimes = new Dictionary<HingeJoint, float>();
+    private readonly HashSet<HingeJoint> torqueAutoFoldStoppedHinges = new HashSet<HingeJoint>();
+
+    private OrigamiPhysicsMonitor physicsMonitor;
+
+    public float AppliedFoldProgress { get { return appliedFoldProgress; } }
+    public float LastStableFoldProgress { get { return lastStableFoldProgress; } }
+    public OrigamiPhysicsHealthState PhysicsState
+    {
+        get { return physicsMonitor != null ? physicsMonitor.CurrentState : OrigamiPhysicsHealthState.Normal; }
+    }
+
     private static bool IsJointValid(HingeJoint joint)
     {
-        // 双重判断：先判空，再检查实例ID（0 表示已销毁）
         return joint != null && joint.GetInstanceID() != 0;
     }
 
-    void Start()
+    private void Awake()
     {
-        // 初始获取有效关节（过滤无效对象）
+        physicsMonitor = GetComponent<OrigamiPhysicsMonitor>();
+        if (physicsMonitor == null)
+            physicsMonitor = gameObject.AddComponent<OrigamiPhysicsMonitor>();
+    }
+
+    private void Start()
+    {
+        requestedFoldProgress = Mathf.Clamp01(foldProgress);
+        lastFoldProgress = requestedFoldProgress;
+        lastStableFoldProgress = requestedFoldProgress;
+
         var initialJoints = FindObjectsOfType<HingeJoint>().Where(IsJointValid).ToList();
-        hinges.AddRange(initialJoints);
+        foreach (var joint in initialJoints)
+            AddHinge(joint);
+
+        if (physicsMonitor != null)
+            physicsMonitor.RegisterHinges(hingeInfos);
+
         if (autoFoldToMaxOnStart)
             StartTorqueAutoFoldToMax();
-        Debug.Log($"初始找到 {initialJoints.Count} 个有效折痕铰链");
+
+        Debug.Log("[OrigamiController] Found " + initialJoints.Count + " valid hinge joints.");
     }
 
-    // 添加铰链方法（保留有效性和重复检查）
     public void AddHinge(HingeJoint hinge)
     {
-        if (IsJointValid(hinge) && !hinges.Contains(hinge))
+        if (!IsJointValid(hinge))
         {
-            hinges.Add(hinge);
-            if (torqueAutoFoldActive)
-            {
-                ConfigureHingeForTorqueAutoFold(hinge);
-                TrackTorqueAutoFoldHinge(hinge);
-            }
-            Debug.Log($"添加新铰链，当前有效铰链数：{hinges.Count}");
+            Debug.LogWarning("[OrigamiController] Ignored an invalid hinge joint.");
+            return;
         }
-        else
-        {
-            Debug.LogWarning("尝试添加无效或重复的铰链，已忽略");
-        }
+
+        OrigamiHingeInfo info = FindOrCreateHingeInfo(hinge);
+        AddHinge(hinge, info);
     }
 
-    void Update()
+    public void AddHinge(HingeJoint hinge, OrigamiHingeInfo info)
     {
-        // 过滤无效关节（每次Update前清理，确保遍历的都是有效对象）
-        FilterInvalidJoints();
-
-        // 仅当有有效关节时执行控制逻辑
-        if (hinges.Count > 0)
-        {
-            if (!torqueAutoFoldActive)
-                HandleFoldInput();
-            HandleRotationInput();
-            if (!torqueAutoFoldActive)
-                SyncFoldProgressWithSlider();
-        }
-    }
-
-    void FixedUpdate()
-    {
-        if (!torqueAutoFoldActive)
+        if (!IsJointValid(hinge) || info == null || hinges.Contains(hinge))
             return;
 
+        info.hinge = hinge;
+        hinges.Add(hinge);
+        hingeInfos.Add(info);
+
+        if (torqueAutoFoldActive)
+        {
+            ConfigureHingeForTorqueAutoFold(hinge, info);
+            if (info.isDriver)
+                TrackTorqueAutoFoldHinge(hinge);
+        }
+
+        if (physicsMonitor != null)
+            physicsMonitor.RegisterHinges(hingeInfos);
+    }
+
+    private OrigamiHingeInfo FindOrCreateHingeInfo(HingeJoint hinge)
+    {
+        var existing = hinge.GetComponents<OrigamiHingeInfo>();
+        for (int i = 0; i < existing.Length; i++)
+        {
+            if (existing[i] != null && existing[i].hinge == hinge)
+                return existing[i];
+        }
+
+        var created = hinge.gameObject.AddComponent<OrigamiHingeInfo>();
+        created.hinge = hinge;
+        created.isDriver = true;
+        created.driveWeight = 1f;
+        return created;
+    }
+
+    private void Update()
+    {
         FilterInvalidJoints();
         if (hinges.Count == 0)
             return;
 
-        ApplyTorqueAutoFoldToMax();
+        if (!torqueAutoFoldActive)
+        {
+            HandleFoldInput();
+            SyncFoldProgressWithSlider();
+        }
+
+        HandleRotationInput();
     }
 
-    // 清理无效关节（核心修复：基于实例ID判断）
+    private void FixedUpdate()
+    {
+        FilterInvalidJoints();
+        if (hinges.Count == 0)
+            return;
+
+        if (PhysicsState == OrigamiPhysicsHealthState.Danger && pauseOnDanger)
+        {
+            if (!dangerPauseApplied)
+            {
+                FreezeSpringTargetsAtCurrentAngles();
+                requestedFoldProgress = lastStableFoldProgress;
+                foldProgress = lastStableFoldProgress;
+                lastFoldProgress = foldProgress;
+                dangerPauseApplied = true;
+                Debug.LogWarning("[OrigamiController] Physics danger detected. Hinge drive force was released; the last stable target is restored.");
+            }
+
+            if (torqueAutoFoldActive)
+                StopTorqueAutoFoldToMax();
+            return;
+        }
+
+        if (PhysicsState != OrigamiPhysicsHealthState.Danger)
+            dangerPauseApplied = false;
+
+        if (torqueAutoFoldActive)
+        {
+            ApplyTorqueAutoFoldToMax();
+            return;
+        }
+
+        ApplySpringDrive();
+    }
+
     private void FilterInvalidJoints()
     {
-        int invalidCount = hinges.RemoveAll(joint => !IsJointValid(joint));
-        if (invalidCount > 0)
+        bool changed = false;
+        for (int i = hinges.Count - 1; i >= 0; i--)
         {
-            Debug.Log($"清理了 {invalidCount} 个无效铰链");
+            bool hasInfo = i < hingeInfos.Count;
+            if (IsJointValid(hinges[i]) && hasInfo && hingeInfos[i] != null)
+                continue;
+
+            hinges.RemoveAt(i);
+            if (hasInfo)
+                hingeInfos.RemoveAt(i);
+            changed = true;
         }
+
+        if (changed && physicsMonitor != null)
+            physicsMonitor.RegisterHinges(hingeInfos);
     }
 
-    // 处理折叠输入
     private void HandleFoldInput()
     {
+        float range = GetAverageAngleRange();
+        float progressDelta = foldSpeed * Time.deltaTime / Mathf.Max(1f, range);
         if (Input.GetKey(KeyCode.UpArrow))
-            AdjustFold(+foldSpeed * Time.deltaTime);
+            AdjustFold(progressDelta);
         if (Input.GetKey(KeyCode.DownArrow))
-            AdjustFold(-foldSpeed * Time.deltaTime);
+            AdjustFold(-progressDelta);
     }
 
-    // 处理旋转输入
     private void HandleRotationInput()
     {
         if (!enableKeyboardRotation)
@@ -129,92 +225,147 @@ public class OrigamiController : MonoBehaviour
             transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime);
     }
 
-    // 同步滑动条和折叠进度
     private void SyncFoldProgressWithSlider()
     {
         if (Mathf.Abs(foldProgress - lastFoldProgress) > 0.001f)
         {
-            SetFoldProgress(foldProgress);
+            requestedFoldProgress = Mathf.Clamp01(foldProgress);
             lastFoldProgress = foldProgress;
         }
     }
 
-    // 调整折叠角度
-    void AdjustFold(float delta)
+    private void AdjustFold(float delta)
     {
-        foreach (var hinge in hinges)
-        {
-            JointSpring spring = hinge.spring;
-            spring.targetPosition = Mathf.Clamp(spring.targetPosition + delta, hinge.limits.min, hinge.limits.max);
-            hinge.spring = spring;
-        }
-
-        UpdateFoldProgress();
+        SetFoldProgress(requestedFoldProgress + delta);
     }
 
-    // 设置折叠进度 (0-1)
+    // Keeps the public API used by SliderController. The actual targets move in FixedUpdate.
     public void SetFoldProgress(float progress)
     {
-        progress = Mathf.Clamp01(progress);
-        foldProgress = progress;
-        lastFoldProgress = progress;
-
-        foreach (var hinge in hinges)
-        {
-            if (!IsJointValid(hinge)) continue; // 双重保险
-
-            JointSpring spring = hinge.spring;
-            float angleRange = hinge.limits.max - hinge.limits.min;
-            if (angleRange < 0.001f)
-            {
-                spring.targetPosition = hinge.limits.min;
-            }
-            else
-            {
-                spring.targetPosition = hinge.limits.min + angleRange * progress;
-            }
-            hinge.spring = spring;
-        }
-    }
-
-    // 更新折叠进度值
-    private void UpdateFoldProgress()
-    {
-        if (hinges.Count == 0) return;
-
-        float totalProgress = 0f;
-        int validJointCount = 0;
-
-        foreach (var hinge in hinges)
-        {
-            if (!IsJointValid(hinge)) continue;
-
-            float angleRange = hinge.limits.max - hinge.limits.min;
-            if (angleRange > 0.001f)
-            {
-                float jointProgress = (hinge.spring.targetPosition - hinge.limits.min) / angleRange;
-                totalProgress += Mathf.Clamp01(jointProgress);
-                validJointCount++;
-            }
-        }
-
-        foldProgress = validJointCount > 0 ? totalProgress / validJointCount : 0f;
+        requestedFoldProgress = Mathf.Clamp01(progress);
+        foldProgress = requestedFoldProgress;
         lastFoldProgress = foldProgress;
     }
 
-    // 供OrigamiLoader调用，清空所有铰链引用
-    // UI Button can call this to fold with Rigidbody torque instead of spring target angles.
+    private void ApplySpringDrive()
+    {
+        float speedMultiplier = PhysicsState == OrigamiPhysicsHealthState.Normal
+            ? 1f
+            : warningSpeedMultiplier;
+
+        for (int i = 0; i < hingeInfos.Count; i++)
+        {
+            OrigamiHingeInfo info = hingeInfos[i];
+            HingeJoint hinge = info != null ? info.hinge : null;
+            if (!IsJointValid(hinge))
+                continue;
+
+            JointSpring spring = hinge.spring;
+            float target = GetTargetAngle(hinge, requestedFoldProgress);
+            float angleSpeed = info.isDriver
+                ? maxDriverAngleSpeed * Mathf.Max(0.05f, info.driveWeight)
+                : maxFollowerAngleSpeed;
+            angleSpeed *= speedMultiplier;
+            spring.targetPosition = Mathf.MoveTowards(
+                spring.targetPosition,
+                target,
+                Mathf.Max(0.01f, angleSpeed) * Time.fixedDeltaTime);
+            hinge.useSpring = true;
+            hinge.spring = spring;
+        }
+
+        appliedFoldProgress = CalculateAppliedFoldProgress();
+        bool gapIsHealthy = physicsMonitor == null
+            || physicsMonitor.MaxSeparation < physicsMonitor.warningSeparation;
+        if (PhysicsState != OrigamiPhysicsHealthState.Danger && gapIsHealthy)
+            lastStableFoldProgress = appliedFoldProgress;
+    }
+
+    private void FreezeSpringTargetsAtCurrentAngles()
+    {
+        for (int i = 0; i < hinges.Count; i++)
+        {
+            HingeJoint hinge = hinges[i];
+            if (!IsJointValid(hinge))
+                continue;
+
+            JointSpring spring = hinge.spring;
+            spring.targetPosition = Mathf.Clamp(hinge.angle, hinge.limits.min, hinge.limits.max);
+            hinge.spring = spring;
+            hinge.useLimits = true;
+            hinge.useSpring = true;
+        }
+    }
+
+    private float GetTargetAngle(HingeJoint hinge, float progress)
+    {
+        return Mathf.Lerp(hinge.limits.min, hinge.limits.max, Mathf.Clamp01(progress));
+    }
+
+    private float GetAverageAngleRange()
+    {
+        float total = 0f;
+        int count = 0;
+        for (int i = 0; i < hinges.Count; i++)
+        {
+            if (!IsJointValid(hinges[i]))
+                continue;
+            total += Mathf.Abs(hinges[i].limits.max - hinges[i].limits.min);
+            count++;
+        }
+
+        return count > 0 ? total / count : 180f;
+    }
+
+    private float CalculateAppliedFoldProgress()
+    {
+        float total = 0f;
+        int count = 0;
+        bool hasDriver = false;
+
+        for (int i = 0; i < hingeInfos.Count; i++)
+        {
+            OrigamiHingeInfo info = hingeInfos[i];
+            HingeJoint hinge = info != null ? info.hinge : null;
+            if (IsJointValid(hinge) && info.isDriver)
+                hasDriver = true;
+        }
+
+        for (int i = 0; i < hingeInfos.Count; i++)
+        {
+            OrigamiHingeInfo info = hingeInfos[i];
+            HingeJoint hinge = info != null ? info.hinge : null;
+            if (!IsJointValid(hinge) || (hasDriver && !info.isDriver))
+                continue;
+
+            float range = hinge.limits.max - hinge.limits.min;
+            if (Mathf.Abs(range) < 0.001f)
+                continue;
+            total += Mathf.Clamp01((hinge.spring.targetPosition - hinge.limits.min) / range);
+            count++;
+        }
+
+        return count > 0 ? total / count : requestedFoldProgress;
+    }
+
     public void StartTorqueAutoFoldToMax()
     {
         FilterInvalidJoints();
+        requestedFoldProgress = 1f;
+        foldProgress = 1f;
+        lastFoldProgress = 1f;
         torqueAutoFoldActive = true;
         torqueAutoFoldElapsed = 0f;
         ClearTorqueAutoFoldState();
 
-        foreach (var hinge in hinges)
+        for (int i = 0; i < hingeInfos.Count; i++)
         {
-            ConfigureHingeForTorqueAutoFold(hinge);
-            TrackTorqueAutoFoldHinge(hinge);
+            OrigamiHingeInfo info = hingeInfos[i];
+            if (info == null || !IsJointValid(info.hinge))
+                continue;
+            ConfigureHingeForTorqueAutoFold(info.hinge, info);
+            if (info.isDriver)
+                TrackTorqueAutoFoldHinge(info.hinge);
         }
     }
 
@@ -223,42 +374,51 @@ public class OrigamiController : MonoBehaviour
         torqueAutoFoldActive = false;
         torqueAutoFoldElapsed = 0f;
         ClearTorqueAutoFoldState();
+
+        for (int i = 0; i < hingeInfos.Count; i++)
+        {
+            OrigamiHingeInfo info = hingeInfos[i];
+            if (info == null || !IsJointValid(info.hinge))
+                continue;
+            info.hinge.useLimits = true;
+            info.hinge.useSpring = true;
+        }
     }
 
-    private void ConfigureHingeForTorqueAutoFold(HingeJoint hinge)
+    private void ConfigureHingeForTorqueAutoFold(HingeJoint hinge, OrigamiHingeInfo info)
     {
         if (!IsJointValid(hinge))
             return;
 
-        hinge.useLimits = false;
-        if (disableSpringDuringTorqueAutoFold)
-            hinge.useSpring = false;
+        hinge.useLimits = true;
+        hinge.useSpring = !info.isDriver || !disableSpringDuringTorqueAutoFold;
     }
 
     private void ApplyTorqueAutoFoldToMax()
     {
         torqueAutoFoldElapsed += Time.fixedDeltaTime;
-        bool anyActiveHinge = false;
+        bool anyActiveDriver = false;
         float direction = Mathf.Sign(torqueAutoFoldDirection);
         if (Mathf.Abs(direction) < 0.001f)
             direction = 1f;
+        float healthMultiplier = PhysicsState == OrigamiPhysicsHealthState.Normal
+            ? 1f
+            : warningSpeedMultiplier;
 
-        foreach (var hinge in hinges)
+        for (int i = 0; i < hingeInfos.Count; i++)
         {
-            if (!IsJointValid(hinge))
+            OrigamiHingeInfo info = hingeInfos[i];
+            HingeJoint hinge = info != null ? info.hinge : null;
+            if (info == null || !info.isDriver || !IsJointValid(hinge))
                 continue;
 
-            ConfigureHingeForTorqueAutoFold(hinge);
             if (!torqueAutoFoldLastAngles.ContainsKey(hinge))
                 TrackTorqueAutoFoldHinge(hinge);
-
             if (torqueAutoFoldStoppedHinges.Contains(hinge))
                 continue;
-
             if (IsTorqueHingeStateUnchanged(hinge))
             {
                 torqueAutoFoldStoppedHinges.Add(hinge);
-                Debug.Log($"[OrigamiController] Torque drive stopped for stalled hinge: {hinge.name}");
                 continue;
             }
 
@@ -270,30 +430,24 @@ public class OrigamiController : MonoBehaviour
             if (worldAxis.sqrMagnitude < 0.0001f)
                 continue;
 
-            float maxTorque = Mathf.Abs(torqueAutoFoldMaxTorque);
+            float maxTorque = Mathf.Abs(torqueAutoFoldMaxTorque) * healthMultiplier;
             float drive = direction * maxTorque - hinge.velocity * torqueAutoFoldDamping;
             drive = Mathf.Clamp(drive, -maxTorque, maxTorque);
-
             Vector3 torque = worldAxis * drive;
             ownerBody.AddTorque(torque, ForceMode.Acceleration);
-            if (hinge.connectedBody != null)
+            if (hinge.connectedBody != null && !hinge.connectedBody.isKinematic)
                 hinge.connectedBody.AddTorque(-torque, ForceMode.Acceleration);
-
-            anyActiveHinge = true;
+            anyActiveDriver = true;
         }
 
-        if (!anyActiveHinge)
-        {
-            torqueAutoFoldActive = false;
-            Debug.Log("[OrigamiController] Torque auto fold stopped: every hinge is stalled.");
-        }
+        if (!anyActiveDriver)
+            StopTorqueAutoFoldToMax();
     }
 
     private void TrackTorqueAutoFoldHinge(HingeJoint hinge)
     {
         if (!IsJointValid(hinge))
             return;
-
         torqueAutoFoldLastAngles[hinge] = hinge.angle;
         torqueAutoFoldStableTimes[hinge] = 0f;
     }
@@ -334,17 +488,17 @@ public class OrigamiController : MonoBehaviour
         torqueAutoFoldStoppedHinges.Clear();
     }
 
-    // Called by OrigamiLoader before rebuilding hinge references.
     public void ClearAllHinges()
     {
         torqueAutoFoldActive = false;
         torqueAutoFoldElapsed = 0f;
         ClearTorqueAutoFoldState();
         hinges.Clear();
-        Debug.Log("OrigamiController：已清空所有铰链引用");
+        hingeInfos.Clear();
+        if (physicsMonitor != null)
+            physicsMonitor.RegisterHinges(hingeInfos);
     }
 
-    // 获取当前有效铰链数量（供调试）
     public int GetValidHingeCount()
     {
         FilterInvalidJoints();

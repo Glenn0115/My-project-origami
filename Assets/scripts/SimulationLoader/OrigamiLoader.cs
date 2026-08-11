@@ -21,6 +21,16 @@ public class OrigamiLoader : MonoBehaviour
     [Min(0.001f)]
     public float colliderThickness = 0.01f;
 
+    [Header("Physics Stability")]
+    public float driverSpring = 60f;
+    public float driverDamper = 10f;
+    public float followerSpring = 3f;
+    public float followerDamper = 16f;
+    public int solverIterations = 12;
+    public int solverVelocityIterations = 8;
+    public bool disableJointPreprocessing = true;
+    public bool pinOneRootFace = true;
+
     [Header("UI 控制")]
     public Text modelNameText;
     public Text modelDescriptionText;
@@ -115,6 +125,10 @@ public class OrigamiLoader : MonoBehaviour
     {
         Debug.Log("[OrigamiLoader] 清理当前模型");
 
+        var controller = GetComponent<OrigamiController>();
+        if (controller != null)
+            controller.ClearAllHinges();
+
         foreach (var obj in faceObjects.Values)
         {
             if (obj != null)
@@ -203,6 +217,9 @@ public class OrigamiLoader : MonoBehaviour
             rb.mass = face.rigid ? 0.2f : 0.1f;
             rb.drag = face.rigid ? 0.8f : 0.5f;
             rb.angularDrag = face.rigid ? 0.8f : 0.5f;
+            rb.solverIterations = Mathf.Max(1, solverIterations);
+            rb.solverVelocityIterations = Mathf.Max(1, solverVelocityIterations);
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
 
             faceObjects[face.id] = obj;
             faceListObjects.Add(obj);
@@ -336,115 +353,178 @@ public class OrigamiLoader : MonoBehaviour
 
     private void CreateCreasesAndConnections()
     {
-        Debug.Log($"[OrigamiLoader] CreateCreasesAndConnections: 使用折痕创建铰链，折痕数={(model.creases != null ? model.creases.Count : 0)}");
+        Debug.Log($"[OrigamiLoader] Creating hinges for {(model.creases != null ? model.creases.Count : 0)} creases.");
         if (model.creases == null || model.creases.Count == 0 || model.faces == null || model.faces.Count == 0)
-        {
-            Debug.Log("[OrigamiLoader] 无折痕或无面，跳过铰链创建");
             return;
+
+        var faceParents = new Dictionary<int, int>();
+        var connectedFaceIds = new HashSet<int>();
+        foreach (var face in model.faces)
+        {
+            if (faceObjects.ContainsKey(face.id))
+                faceParents[face.id] = face.id;
         }
+
+        int driverCount = 0;
+        int followerCount = 0;
+        OrigamiController controller = GetComponent<OrigamiController>();
 
         for (int i = 0; i < model.creases.Count; i++)
         {
-            var crease = model.creases[i];
+            OrigamiCrease crease = model.creases[i];
             if (crease.type == OrigamiCrease.Type.Boundary)
-            {
-                Debug.Log($"[OrigamiLoader] 跳过边界折痕 crease#{crease.id}");
                 continue;
-            }
 
             List<int> touchingFaces = new List<int>();
             for (int fIdx = 0; fIdx < model.faces.Count; fIdx++)
             {
-                var f = model.faces[fIdx];
-                if (f.vertices != null && f.vertices.Contains(crease.v1) && f.vertices.Contains(crease.v2))
+                OrigamiFace face = model.faces[fIdx];
+                if (face.vertices != null && face.vertices.Contains(crease.v1) && face.vertices.Contains(crease.v2))
                     touchingFaces.Add(fIdx);
             }
 
             if (touchingFaces.Count < 2)
             {
-                Debug.LogWarning($"[OrigamiLoader] 折痕#{crease.id} 未找到两侧面，找到={touchingFaces.Count}，跳过铰链创建");
+                Debug.LogWarning($"[OrigamiLoader] Crease {crease.id} touches {touchingFaces.Count} faces; hinge skipped.");
+                continue;
+            }
+            if (touchingFaces.Count > 2)
+                Debug.LogWarning($"[OrigamiLoader] Crease {crease.id} is non-manifold; only the first two faces are used.");
+
+            OrigamiFace faceAData = model.faces[touchingFaces[0]];
+            OrigamiFace faceBData = model.faces[touchingFaces[1]];
+            if (!faceObjects.TryGetValue(faceAData.id, out GameObject faceA)
+                || !faceObjects.TryGetValue(faceBData.id, out GameObject faceB))
+            {
+                Debug.LogWarning($"[OrigamiLoader] Crease {crease.id} references a face that was not generated.");
                 continue;
             }
 
-            // 获取两个相邻面
-            var faceA = faceListObjects[touchingFaces[0]];
-            var faceB = faceListObjects[touchingFaces[1]];
             Rigidbody rbA = faceA.GetComponent<Rigidbody>();
             Rigidbody rbB = faceB.GetComponent<Rigidbody>();
+            if (rbA == null || rbB == null)
+                continue;
 
-            // 计算折痕方向（从v1到v2）
-            Vector3 v1 = vertices[crease.v1 - 1];
-            Vector3 v2 = vertices[crease.v2 - 1];
-            Vector3 creaseDir = (v2 - v1).normalized;
-            Vector3 hingePoint = (v1 + v2) * 0.5f;
+            Vector3 localV1 = vertices[crease.v1 - 1];
+            Vector3 localV2 = vertices[crease.v2 - 1];
+            Vector3 worldHingePoint = transform.TransformPoint((localV1 + localV2) * 0.5f);
+            Vector3 worldCreaseDirection = transform.TransformDirection(localV2 - localV1).normalized;
+            if (worldCreaseDirection.sqrMagnitude < 0.0001f)
+            {
+                Debug.LogWarning($"[OrigamiLoader] Crease {crease.id} has zero length; hinge skipped.");
+                continue;
+            }
 
-            // 获取 OrigamiFace 数据结构
-            OrigamiFace faceAData = model.faces[touchingFaces[0]];
-            OrigamiFace faceBData = model.faces[touchingFaces[1]];
-
-            // 直接用顶点顺序判断左右
             bool isFaceAOnLeft = IsFaceOnLeft_ByVertexOrder(faceAData, crease.v1, crease.v2);
-            bool isFaceBOnLeft = !isFaceAOnLeft; // 两侧必然相反
-
-
-            // 根据折痕类型决定铰链挂载面
             GameObject hingeOwner;
             if (crease.type == OrigamiCrease.Type.Mountain)
-            {
-                // 山折：铰链挂载在左侧面
                 hingeOwner = isFaceAOnLeft ? faceA : faceB;
-            }
             else
-            {
-                // 谷折：铰链挂载在右侧面
                 hingeOwner = isFaceAOnLeft ? faceB : faceA;
-            }
 
-            // 创建铰链
-            var hinge = hingeOwner.AddComponent<HingeJoint>();
-            Rigidbody connectedRb = (hingeOwner == faceA) ? rbB : rbA;
+            Rigidbody connectedRb = hingeOwner == faceA ? rbB : rbA;
+            HingeJoint hinge = hingeOwner.AddComponent<HingeJoint>();
             hinge.connectedBody = connectedRb;
-            hinge.anchor = hingeOwner.transform.InverseTransformPoint(hingePoint);
-            hinge.axis = hingeOwner.transform.InverseTransformDirection(creaseDir);
+            hinge.autoConfigureConnectedAnchor = false;
+            hinge.anchor = hingeOwner.transform.InverseTransformPoint(worldHingePoint);
+            hinge.connectedAnchor = connectedRb.transform.InverseTransformPoint(worldHingePoint);
+            hinge.axis = hingeOwner.transform.InverseTransformDirection(worldCreaseDirection).normalized;
             hinge.useLimits = true;
             hinge.useSpring = true;
             hinge.enableCollision = false;
+            hinge.enablePreprocessing = !disableJointPreprocessing;
 
-            // 设置铰链限制
-            JointLimits lim = new JointLimits
+            float minAngle = Mathf.Min(crease.minAngle, crease.maxAngle);
+            float maxAngle = Mathf.Max(crease.minAngle, crease.maxAngle);
+            JointLimits limits = new JointLimits
             {
-                min = crease.minAngle,
-                max = crease.maxAngle,
+                min = minAngle,
+                max = maxAngle,
                 bounciness = 0f,
                 contactDistance = 0f
             };
-            hinge.limits = lim;
+            hinge.limits = limits;
 
-            // 设置弹簧
+            bool isDriver = FindFaceRoot(faceParents, faceAData.id) != FindFaceRoot(faceParents, faceBData.id);
+            if (isDriver)
+            {
+                UnionFaces(faceParents, faceAData.id, faceBData.id);
+                driverCount++;
+            }
+            else
+            {
+                followerCount++;
+            }
+
+            float stiffnessScale = crease.stiffness > 0f
+                ? Mathf.Clamp(crease.stiffness, 0.25f, 4f)
+                : 1f;
             JointSpring spring = new JointSpring
             {
-                spring = crease.stiffness * 50f,
-                damper = 5f,
-                targetPosition = crease.restAngle
+                spring = (isDriver ? driverSpring : followerSpring) * stiffnessScale,
+                damper = isDriver ? driverDamper : followerDamper,
+                targetPosition = Mathf.Clamp(crease.restAngle, minAngle, maxAngle)
             };
             hinge.spring = spring;
 
-            /*Debug.Log($"[OrigamiLoader] 创建铰链: crease#{crease.id} 类型={crease.type}, " +
-                     $"挂载面={hingeOwner.name}, 左侧面={isFaceAOnLeft ? faceA.name : faceB.name}, " +
-                     $"右侧面={isFaceAOnLeft ? faceB.name : faceA.name}");
-            */
+            OrigamiHingeInfo info = hingeOwner.AddComponent<OrigamiHingeInfo>();
+            info.Configure(
+                hinge,
+                crease.id,
+                faceAData.id,
+                faceBData.id,
+                isDriver,
+                isDriver ? 1f : 0.25f);
 
             hinges.Add(hinge);
-
-            var controller = GetComponent<OrigamiController>();
+            connectedFaceIds.Add(faceAData.id);
+            connectedFaceIds.Add(faceBData.id);
             if (controller != null)
-            {
-                controller.AddHinge(hinge);
-                Debug.Log($"[OrigamiLoader] 已注册到控制器: hinge of crease#{crease.id}");
-            }
+                controller.AddHinge(hinge, info);
         }
+
+        if (pinOneRootFace)
+            PinRootFaces(faceParents, connectedFaceIds);
+
+        Debug.Log($"[OrigamiLoader] Hinges ready: drivers={driverCount}, followers={followerCount}.");
     }
 
+    private int FindFaceRoot(Dictionary<int, int> parents, int faceId)
+    {
+        if (!parents.TryGetValue(faceId, out int parent))
+            return faceId;
+        if (parent == faceId)
+            return faceId;
+
+        int root = FindFaceRoot(parents, parent);
+        parents[faceId] = root;
+        return root;
+    }
+
+    private void UnionFaces(Dictionary<int, int> parents, int faceAId, int faceBId)
+    {
+        int rootA = FindFaceRoot(parents, faceAId);
+        int rootB = FindFaceRoot(parents, faceBId);
+        if (rootA != rootB)
+            parents[rootB] = rootA;
+    }
+
+    private void PinRootFaces(Dictionary<int, int> parents, HashSet<int> connectedFaceIds)
+    {
+        var pinnedRoots = new HashSet<int>();
+        foreach (int faceId in connectedFaceIds)
+        {
+            int root = FindFaceRoot(parents, faceId);
+            if (!pinnedRoots.Add(root))
+                continue;
+            if (!faceObjects.TryGetValue(faceId, out GameObject faceObject))
+                continue;
+
+            Rigidbody body = faceObject.GetComponent<Rigidbody>();
+            if (body != null)
+                body.isKinematic = true;
+        }
+    }
     // 计算面的法向量（基于Mesh的顶点顺序）
     /*private Vector3 CalculateFaceNormal(GameObject face)
     {
