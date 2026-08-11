@@ -249,10 +249,6 @@ public class OrigamiController : MonoBehaviour
 
     private void ApplySpringDrive()
     {
-        float speedMultiplier = PhysicsState == OrigamiPhysicsHealthState.Normal
-            ? 1f
-            : warningSpeedMultiplier;
-
         for (int i = 0; i < hingeInfos.Count; i++)
         {
             OrigamiHingeInfo info = hingeInfos[i];
@@ -265,6 +261,9 @@ public class OrigamiController : MonoBehaviour
             float angleSpeed = info.isDriver
                 ? maxDriverAngleSpeed * Mathf.Max(0.05f, info.driveWeight)
                 : maxFollowerAngleSpeed;
+            float speedMultiplier = physicsMonitor != null && physicsMonitor.ShouldSlowHinge(info)
+                ? warningSpeedMultiplier
+                : 1f;
             angleSpeed *= speedMultiplier;
             spring.targetPosition = Mathf.MoveTowards(
                 spring.targetPosition,
@@ -401,9 +400,6 @@ public class OrigamiController : MonoBehaviour
         float direction = Mathf.Sign(torqueAutoFoldDirection);
         if (Mathf.Abs(direction) < 0.001f)
             direction = 1f;
-        float healthMultiplier = PhysicsState == OrigamiPhysicsHealthState.Normal
-            ? 1f
-            : warningSpeedMultiplier;
 
         for (int i = 0; i < hingeInfos.Count; i++)
         {
@@ -430,6 +426,9 @@ public class OrigamiController : MonoBehaviour
             if (worldAxis.sqrMagnitude < 0.0001f)
                 continue;
 
+            float healthMultiplier = physicsMonitor != null && physicsMonitor.ShouldSlowHinge(info)
+                ? warningSpeedMultiplier
+                : 1f;
             float maxTorque = Mathf.Abs(torqueAutoFoldMaxTorque) * healthMultiplier;
             float drive = direction * maxTorque - hinge.velocity * torqueAutoFoldDamping;
             drive = Mathf.Clamp(drive, -maxTorque, maxTorque);

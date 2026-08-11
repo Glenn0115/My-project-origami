@@ -28,10 +28,20 @@ public sealed class OrigamiPhysicsMonitor : MonoBehaviour
     public float MaxSeparation { get; private set; }
     public int HingeCount { get; private set; }
     public int WorstCreaseId { get; private set; }
+    public int LocallySlowedHingeCount { get; private set; }
 
     private readonly List<OrigamiHingeInfo> hingeInfos = new List<OrigamiHingeInfo>();
+    private readonly Dictionary<OrigamiHingeInfo, float> hingeSeparations =
+        new Dictionary<OrigamiHingeInfo, float>();
+    private readonly HashSet<OrigamiHingeInfo> locallySlowedHinges =
+        new HashSet<OrigamiHingeInfo>();
     private float elapsed;
     private GUIStyle overlayStyle;
+
+    public bool ShouldSlowHinge(OrigamiHingeInfo info)
+    {
+        return info != null && locallySlowedHinges.Contains(info);
+    }
 
     public void RegisterHinges(IList<OrigamiHingeInfo> source)
     {
@@ -46,6 +56,9 @@ public sealed class OrigamiPhysicsMonitor : MonoBehaviour
         }
 
         HingeCount = hingeInfos.Count;
+        hingeSeparations.Clear();
+        locallySlowedHinges.Clear();
+        LocallySlowedHingeCount = 0;
         if (HingeCount == 0)
         {
             MaxSeparation = 0f;
@@ -69,6 +82,10 @@ public sealed class OrigamiPhysicsMonitor : MonoBehaviour
         float maxSeparation = 0f;
         int worstCreaseId = 0;
         int validCount = 0;
+        float warningThreshold = Mathf.Min(warningSeparation, dangerSeparation);
+        float dangerThreshold = Mathf.Max(warningSeparation, dangerSeparation);
+        hingeSeparations.Clear();
+        locallySlowedHinges.Clear();
 
         for (int i = 0; i < hingeInfos.Count; i++)
         {
@@ -81,6 +98,10 @@ public sealed class OrigamiPhysicsMonitor : MonoBehaviour
             Vector3 connectedPoint = hinge.connectedBody.transform.TransformPoint(hinge.connectedAnchor);
             float separation = Vector3.Distance(ownerPoint, connectedPoint);
             validCount++;
+            hingeSeparations[info] = separation;
+
+            if (separation >= warningThreshold)
+                locallySlowedHinges.Add(info);
 
             if (separation > maxSeparation)
             {
@@ -89,12 +110,36 @@ public sealed class OrigamiPhysicsMonitor : MonoBehaviour
             }
         }
 
+        // Expand once to hinges sharing a face with an actual warning hinge.
+        // Faces discovered from neighbours are deliberately not expanded again.
+        var affectedFaceIds = new HashSet<int>();
+        foreach (OrigamiHingeInfo info in locallySlowedHinges)
+        {
+            if (!info.hasFaceTopology)
+                continue;
+            affectedFaceIds.Add(info.faceAId);
+            affectedFaceIds.Add(info.faceBId);
+        }
+
+        if (affectedFaceIds.Count > 0)
+        {
+            foreach (KeyValuePair<OrigamiHingeInfo, float> pair in hingeSeparations)
+            {
+                OrigamiHingeInfo info = pair.Key;
+                if (info.hasFaceTopology
+                    && (affectedFaceIds.Contains(info.faceAId)
+                        || affectedFaceIds.Contains(info.faceBId)))
+                {
+                    locallySlowedHinges.Add(info);
+                }
+            }
+        }
+
         HingeCount = validCount;
         MaxSeparation = maxSeparation;
         WorstCreaseId = worstCreaseId;
+        LocallySlowedHingeCount = locallySlowedHinges.Count;
 
-        float warningThreshold = Mathf.Min(warningSeparation, dangerSeparation);
-        float dangerThreshold = Mathf.Max(warningSeparation, dangerSeparation);
         OrigamiPhysicsHealthState nextState = OrigamiPhysicsHealthState.Normal;
         if (MaxSeparation >= dangerThreshold)
             nextState = OrigamiPhysicsHealthState.Danger;
@@ -113,7 +158,8 @@ public sealed class OrigamiPhysicsMonitor : MonoBehaviour
         string message = "[OrigamiPhysicsMonitor] State=" + CurrentState
             + ", hinges=" + HingeCount
             + ", max separation=" + MaxSeparation.ToString("F5")
-            + ", crease=" + WorstCreaseId;
+            + ", crease=" + WorstCreaseId
+            + ", locally slowed=" + LocallySlowedHingeCount;
 
         if (CurrentState == OrigamiPhysicsHealthState.Normal)
             Debug.Log(message);
@@ -147,18 +193,20 @@ public sealed class OrigamiPhysicsMonitor : MonoBehaviour
                 + ".";
             background = new Color(0.65f, 0.08f, 0.08f, 0.95f);
         }
-        else if (MaxSeparation >= warningSeparation)
+        else if (LocallySlowedHingeCount > 0)
         {
             message = "Origami stability warning: hinge gap "
                 + MaxSeparation.ToString("F4")
-                + ". Drive speed reduced.";
+                + ". Drive speed reduced for "
+                + LocallySlowedHingeCount
+                + " local hinges.";
             background = new Color(0.75f, 0.45f, 0.02f, 0.95f);
         }
         else
         {
             message = "Complex origami: "
                 + HingeCount
-                + " hinges. Drive speed reduced.";
+                + " hinges. Local gap monitoring is active.";
             background = new Color(0.75f, 0.45f, 0.02f, 0.95f);
         }
 

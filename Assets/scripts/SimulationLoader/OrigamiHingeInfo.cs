@@ -7,6 +7,7 @@ public sealed class OrigamiHingeInfo : MonoBehaviour
     public int creaseId;
     public int faceAId;
     public int faceBId;
+    public bool hasFaceTopology;
     public bool isDriver = true;
 
     [Range(0.05f, 1f)]
@@ -24,6 +25,7 @@ public sealed class OrigamiHingeInfo : MonoBehaviour
         creaseId = targetCreaseId;
         faceAId = targetFaceAId;
         faceBId = targetFaceBId;
+        hasFaceTopology = true;
         isDriver = driver;
         driveWeight = Mathf.Clamp(weight, 0.05f, 1f);
     }
