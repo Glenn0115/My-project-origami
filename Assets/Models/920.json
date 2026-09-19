@@ -1,271 +1,273 @@
 {
-    "name": "920",
-    "description": "Point-edge based crease pattern",
-    "vertices": [
-        {
-            "x": -2.0,
-            "y": 0.0,
-            "z": -8.0
-        },
-        {
-            "x": -2.0,
-            "y": 0.0,
-            "z": -6.0
-        },
-        {
-            "x": -4.0,
-            "y": 0.0,
-            "z": -6.0
-        },
-        {
-            "x": -14.0,
-            "y": 0.0,
-            "z": 0.0
-        },
-        {
-            "x": -4.0,
-            "y": 0.0,
-            "z": -10.0
-        },
-        {
-            "x": -2.0,
-            "y": 0.0,
-            "z": -10.0
-        },
-        {
-            "x": 0.0,
-            "y": 0.0,
-            "z": -10.0
-        },
-        {
-            "x": 0.0,
-            "y": 0.0,
-            "z": -8.0
-        },
-        {
-            "x": 0.0,
-            "y": 0.0,
-            "z": -6.0
-        },
-        {
-            "x": -4.0,
-            "y": 0.0,
-            "z": -8.0
-        }
-    ],
-    "faces": [
-        {
-            "id": 1,
-            "vertices": [
-                10,
-                5,
-                6,
-                1
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
-        },
-        {
-            "id": 2,
-            "vertices": [
-                3,
-                10,
-                1,
-                2
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
-        },
-        {
-            "id": 3,
-            "vertices": [
-                9,
-                2,
-                1,
-                8
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
-        },
-        {
-            "id": 4,
-            "vertices": [
-                7,
-                8,
-                1,
-                6
-            ],
-            "rigid": false,
-            "color": "#FFFFFF"
-        }
-    ],
-    "creases": [
-        {
-            "id": 1,
-            "v1": 5,
-            "v2": 10,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 2,
-            "v1": 10,
-            "v2": 3,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 3,
-            "v1": 3,
-            "v2": 2,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 4,
-            "v1": 2,
-            "v2": 9,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 5,
-            "v1": 9,
-            "v2": 8,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 6,
-            "v1": 8,
-            "v2": 7,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 7,
-            "v1": 7,
-            "v2": 6,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 8,
-            "v1": 6,
-            "v2": 5,
-            "type": 2,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 9,
-            "v1": 10,
-            "v2": 1,
-            "type": 0,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 10,
-            "v1": 1,
-            "v2": 8,
-            "type": 1,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 11,
-            "v1": 1,
-            "v2": 2,
-            "type": 0,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        },
-        {
-            "id": 12,
-            "v1": 1,
-            "v2": 6,
-            "type": 0,
-            "driveMode": 0,
-            "actuatorGroup": 0,
-            "restAngle": 0.0,
-            "minAngle": 0.0,
-            "maxAngle": 180.0,
-            "stiffness": 1.0,
-            "width": 0.05000000074505806
-        }
-    ],
-    "connections": [],
-    "material": {
-        "name": "default",
-        "metallic": 0.0,
-        "smoothness": 0.5,
-        "doubleSided": true
+  "name": "920",
+  "description": "Three-actuator version. Crease 9, directly opposite mountain crease 10, is passive and has no actuator. Active creases: 10, 11 and 12.",
+  "vertices": [
+    {
+      "x": -2,
+      "y": 0,
+      "z": -8
     },
-    "defaultCreaseWidth": 0.05000000074505806,
-    "mountainCreaseColor": "#FF0000",
-    "valleyCreaseColor": "#0000FF",
-    "boundaryCreaseColor": "#000000"
+    {
+      "x": -2,
+      "y": 0,
+      "z": -6
+    },
+    {
+      "x": -4,
+      "y": 0,
+      "z": -6
+    },
+    {
+      "x": -14,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": -4,
+      "y": 0,
+      "z": -10
+    },
+    {
+      "x": -2,
+      "y": 0,
+      "z": -10
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -10
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -8
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -6
+    },
+    {
+      "x": -4,
+      "y": 0,
+      "z": -8
+    }
+  ],
+  "faces": [
+    {
+      "id": 1,
+      "vertices": [
+        10,
+        5,
+        6,
+        1
+      ],
+      "rigid": false,
+      "color": "#FFFFFF"
+    },
+    {
+      "id": 2,
+      "vertices": [
+        3,
+        10,
+        1,
+        2
+      ],
+      "rigid": false,
+      "color": "#FFFFFF"
+    },
+    {
+      "id": 3,
+      "vertices": [
+        9,
+        2,
+        1,
+        8
+      ],
+      "rigid": false,
+      "color": "#FFFFFF"
+    },
+    {
+      "id": 4,
+      "vertices": [
+        7,
+        8,
+        1,
+        6
+      ],
+      "rigid": false,
+      "color": "#FFFFFF"
+    }
+  ],
+  "creases": [
+    {
+      "id": 1,
+      "v1": 5,
+      "v2": 10,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 2,
+      "v1": 10,
+      "v2": 3,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 3,
+      "v1": 3,
+      "v2": 2,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 4,
+      "v1": 2,
+      "v2": 9,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 5,
+      "v1": 9,
+      "v2": 8,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 6,
+      "v1": 8,
+      "v2": 7,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 7,
+      "v1": 7,
+      "v2": 6,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 8,
+      "v1": 6,
+      "v2": 5,
+      "type": 2,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 9,
+      "v1": 10,
+      "v2": 1,
+      "type": 0,
+      "driveMode": 2,
+      "actuatorGroup": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 10,
+      "v1": 1,
+      "v2": 8,
+      "type": 1,
+      "driveMode": 1,
+      "actuatorGroup": 3,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 11,
+      "v1": 1,
+      "v2": 2,
+      "type": 0,
+      "driveMode": 1,
+      "actuatorGroup": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    },
+    {
+      "id": 12,
+      "v1": 1,
+      "v2": 6,
+      "type": 0,
+      "driveMode": 1,
+      "actuatorGroup": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 180,
+      "stiffness": 1,
+      "width": 0.05000000074505806
+    }
+  ],
+  "connections": [],
+  "material": {
+    "name": "default",
+    "metallic": 0,
+    "smoothness": 0.5,
+    "doubleSided": true
+  },
+  "defaultCreaseWidth": 0.05000000074505806,
+  "mountainCreaseColor": "#FF0000",
+  "valleyCreaseColor": "#0000FF",
+  "boundaryCreaseColor": "#000000"
 }
+
+
