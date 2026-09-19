@@ -1,0 +1,354 @@
+{
+  "name": "WorkB_Lotus_Simple6",
+  "description": "六瓣单折莲花：6条驱动折痕，适合2路联动或6路独立舵机",
+  "vertices": [
+    {
+      "x": 1.8,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 0.9,
+      "y": 0,
+      "z": 1.559
+    },
+    {
+      "x": -0.9,
+      "y": 0,
+      "z": 1.559
+    },
+    {
+      "x": -1.8,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": -0.9,
+      "y": 0,
+      "z": -1.559
+    },
+    {
+      "x": 0.9,
+      "y": 0,
+      "z": -1.559
+    },
+    {
+      "x": 4.503,
+      "y": 0,
+      "z": 2.6
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 5.2
+    },
+    {
+      "x": -4.503,
+      "y": 0,
+      "z": 2.6
+    },
+    {
+      "x": -4.503,
+      "y": 0,
+      "z": -2.6
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -5.2
+    },
+    {
+      "x": 4.503,
+      "y": 0,
+      "z": -2.6
+    }
+  ],
+  "faces": [
+    {
+      "id": 1,
+      "vertices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "rigid": true,
+      "color": "#F4C542"
+    },
+    {
+      "id": 2,
+      "vertices": [
+        1,
+        7,
+        2
+      ],
+      "rigid": false,
+      "color": "#F25C8A"
+    },
+    {
+      "id": 3,
+      "vertices": [
+        2,
+        8,
+        3
+      ],
+      "rigid": false,
+      "color": "#FF8FAE"
+    },
+    {
+      "id": 4,
+      "vertices": [
+        3,
+        9,
+        4
+      ],
+      "rigid": false,
+      "color": "#F25C8A"
+    },
+    {
+      "id": 5,
+      "vertices": [
+        4,
+        10,
+        5
+      ],
+      "rigid": false,
+      "color": "#FF8FAE"
+    },
+    {
+      "id": 6,
+      "vertices": [
+        5,
+        11,
+        6
+      ],
+      "rigid": false,
+      "color": "#F25C8A"
+    },
+    {
+      "id": 7,
+      "vertices": [
+        6,
+        12,
+        1
+      ],
+      "rigid": false,
+      "color": "#FF8FAE"
+    }
+  ],
+  "creases": [
+    {
+      "id": 1,
+      "v1": 1,
+      "v2": 2,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 55,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 2,
+      "v1": 2,
+      "v2": 3,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 55,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 3,
+      "v1": 3,
+      "v2": 4,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 55,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 4,
+      "v1": 4,
+      "v2": 5,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 55,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 5,
+      "v1": 5,
+      "v2": 6,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 55,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 6,
+      "v1": 6,
+      "v2": 1,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 55,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 7,
+      "v1": 1,
+      "v2": 7,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 8,
+      "v1": 2,
+      "v2": 7,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 9,
+      "v1": 2,
+      "v2": 8,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 10,
+      "v1": 3,
+      "v2": 8,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 11,
+      "v1": 3,
+      "v2": 9,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 12,
+      "v1": 4,
+      "v2": 9,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 13,
+      "v1": 4,
+      "v2": 10,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 14,
+      "v1": 5,
+      "v2": 10,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 15,
+      "v1": 5,
+      "v2": 11,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 16,
+      "v1": 6,
+      "v2": 11,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 17,
+      "v1": 6,
+      "v2": 12,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 18,
+      "v1": 1,
+      "v2": 12,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    }
+  ],
+  "connections": [],
+  "material": {
+    "name": "lotus_paper",
+    "metallic": 0,
+    "smoothness": 0.25,
+    "doubleSided": true
+  },
+  "defaultCreaseWidth": 0.025,
+  "mountainCreaseColor": "#E53935",
+  "valleyCreaseColor": "#1565C0",
+  "boundaryCreaseColor": "#202020"
+}
+
+

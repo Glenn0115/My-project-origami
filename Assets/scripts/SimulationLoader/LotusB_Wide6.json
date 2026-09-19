@@ -1,0 +1,456 @@
+{
+  "name": "WorkB_Lotus_Wide6",
+  "description": "六瓣宽翼莲花：6条驱动折痕，展开面积更大",
+  "vertices": [
+    {
+      "x": 1.6,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 0.8,
+      "y": 0,
+      "z": 1.386
+    },
+    {
+      "x": -0.8,
+      "y": 0,
+      "z": 1.386
+    },
+    {
+      "x": -1.6,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": -0.8,
+      "y": 0,
+      "z": -1.386
+    },
+    {
+      "x": 0.8,
+      "y": 0,
+      "z": -1.386
+    },
+    {
+      "x": 5.067,
+      "y": 0,
+      "z": 1.17
+    },
+    {
+      "x": 3.546,
+      "y": 0,
+      "z": 3.803
+    },
+    {
+      "x": 1.52,
+      "y": 0,
+      "z": 4.973
+    },
+    {
+      "x": -1.52,
+      "y": 0,
+      "z": 4.973
+    },
+    {
+      "x": -3.546,
+      "y": 0,
+      "z": 3.803
+    },
+    {
+      "x": -5.067,
+      "y": 0,
+      "z": 1.17
+    },
+    {
+      "x": -5.067,
+      "y": 0,
+      "z": -1.17
+    },
+    {
+      "x": -3.546,
+      "y": 0,
+      "z": -3.803
+    },
+    {
+      "x": -1.52,
+      "y": 0,
+      "z": -4.973
+    },
+    {
+      "x": 1.52,
+      "y": 0,
+      "z": -4.973
+    },
+    {
+      "x": 3.546,
+      "y": 0,
+      "z": -3.803
+    },
+    {
+      "x": 5.067,
+      "y": 0,
+      "z": -1.17
+    }
+  ],
+  "faces": [
+    {
+      "id": 1,
+      "vertices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "rigid": true,
+      "color": "#F4C542"
+    },
+    {
+      "id": 2,
+      "vertices": [
+        1,
+        7,
+        8,
+        2
+      ],
+      "rigid": false,
+      "color": "#ED5D8C"
+    },
+    {
+      "id": 3,
+      "vertices": [
+        2,
+        9,
+        10,
+        3
+      ],
+      "rigid": false,
+      "color": "#FF9DB8"
+    },
+    {
+      "id": 4,
+      "vertices": [
+        3,
+        11,
+        12,
+        4
+      ],
+      "rigid": false,
+      "color": "#ED5D8C"
+    },
+    {
+      "id": 5,
+      "vertices": [
+        4,
+        13,
+        14,
+        5
+      ],
+      "rigid": false,
+      "color": "#FF9DB8"
+    },
+    {
+      "id": 6,
+      "vertices": [
+        5,
+        15,
+        16,
+        6
+      ],
+      "rigid": false,
+      "color": "#ED5D8C"
+    },
+    {
+      "id": 7,
+      "vertices": [
+        6,
+        17,
+        18,
+        1
+      ],
+      "rigid": false,
+      "color": "#FF9DB8"
+    }
+  ],
+  "creases": [
+    {
+      "id": 1,
+      "v1": 1,
+      "v2": 2,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 50,
+      "stiffness": 1.25,
+      "width": 0.035
+    },
+    {
+      "id": 2,
+      "v1": 2,
+      "v2": 3,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 50,
+      "stiffness": 1.25,
+      "width": 0.035
+    },
+    {
+      "id": 3,
+      "v1": 3,
+      "v2": 4,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 50,
+      "stiffness": 1.25,
+      "width": 0.035
+    },
+    {
+      "id": 4,
+      "v1": 4,
+      "v2": 5,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 50,
+      "stiffness": 1.25,
+      "width": 0.035
+    },
+    {
+      "id": 5,
+      "v1": 5,
+      "v2": 6,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 50,
+      "stiffness": 1.25,
+      "width": 0.035
+    },
+    {
+      "id": 6,
+      "v1": 6,
+      "v2": 1,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 50,
+      "stiffness": 1.25,
+      "width": 0.035
+    },
+    {
+      "id": 7,
+      "v1": 1,
+      "v2": 7,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 8,
+      "v1": 7,
+      "v2": 8,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 9,
+      "v1": 2,
+      "v2": 8,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 10,
+      "v1": 2,
+      "v2": 9,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 11,
+      "v1": 9,
+      "v2": 10,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 12,
+      "v1": 3,
+      "v2": 10,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 13,
+      "v1": 3,
+      "v2": 11,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 14,
+      "v1": 11,
+      "v2": 12,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 15,
+      "v1": 4,
+      "v2": 12,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 16,
+      "v1": 4,
+      "v2": 13,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 17,
+      "v1": 13,
+      "v2": 14,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 18,
+      "v1": 5,
+      "v2": 14,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 19,
+      "v1": 5,
+      "v2": 15,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 20,
+      "v1": 15,
+      "v2": 16,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 21,
+      "v1": 6,
+      "v2": 16,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 22,
+      "v1": 6,
+      "v2": 17,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 23,
+      "v1": 17,
+      "v2": 18,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 24,
+      "v1": 1,
+      "v2": 18,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    }
+  ],
+  "connections": [],
+  "material": {
+    "name": "lotus_paper",
+    "metallic": 0,
+    "smoothness": 0.25,
+    "doubleSided": true
+  },
+  "defaultCreaseWidth": 0.025,
+  "mountainCreaseColor": "#E53935",
+  "valleyCreaseColor": "#1565C0",
+  "boundaryCreaseColor": "#202020"
+}
+
+

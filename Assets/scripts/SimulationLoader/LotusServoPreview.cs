@@ -16,7 +16,7 @@ public sealed class LotusServoPreview : MonoBehaviour
     private readonly List<Transform> petalPivots = new List<Transform>();
     private float commandedAngle;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+//     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
     {
         if (FindObjectOfType<LotusServoPreview>() != null)
