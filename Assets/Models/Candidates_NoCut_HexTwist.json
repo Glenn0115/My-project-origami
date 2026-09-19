@@ -1,0 +1,682 @@
+{
+  "name": "Candidate_C_NoCut_HexTwist_Maekawa",
+  "description": "单张六边形旋拧折痕；每个内六边形顶点为3山1谷，满足|M-V|=2，折线沿内六边形边方向延伸至外轮廓。适合3或6舵机。",
+  "vertices": [
+    {
+      "x": 0,
+      "y": 0,
+      "z": -2
+    },
+    {
+      "x": 1.7321,
+      "y": 0,
+      "z": -1
+    },
+    {
+      "x": 1.7321,
+      "y": 0,
+      "z": 1
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 2
+    },
+    {
+      "x": -1.7321,
+      "y": 0,
+      "z": 1
+    },
+    {
+      "x": -1.7321,
+      "y": 0,
+      "z": -1
+    },
+    {
+      "x": -2.7713,
+      "y": 0,
+      "z": -0.4
+    },
+    {
+      "x": -2.7713,
+      "y": 0,
+      "z": -1.6
+    },
+    {
+      "x": -1.7321,
+      "y": 0,
+      "z": -2.2
+    },
+    {
+      "x": -1.0392,
+      "y": 0,
+      "z": -2.6
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -3.2
+    },
+    {
+      "x": 1.0392,
+      "y": 0,
+      "z": -2.6
+    },
+    {
+      "x": 1.7321,
+      "y": 0,
+      "z": -2.2
+    },
+    {
+      "x": 2.7713,
+      "y": 0,
+      "z": -1.6
+    },
+    {
+      "x": 2.7713,
+      "y": 0,
+      "z": -0.4
+    },
+    {
+      "x": 2.7713,
+      "y": 0,
+      "z": 0.4
+    },
+    {
+      "x": 2.7713,
+      "y": 0,
+      "z": 1.6
+    },
+    {
+      "x": 1.7321,
+      "y": 0,
+      "z": 2.2
+    },
+    {
+      "x": 1.0392,
+      "y": 0,
+      "z": 2.6
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 3.2
+    },
+    {
+      "x": -1.0392,
+      "y": 0,
+      "z": 2.6
+    },
+    {
+      "x": -1.7321,
+      "y": 0,
+      "z": 2.2
+    },
+    {
+      "x": -2.7713,
+      "y": 0,
+      "z": 1.6
+    },
+    {
+      "x": -2.7713,
+      "y": 0,
+      "z": 0.4
+    }
+  ],
+  "faces": [
+    {
+      "id": 1,
+      "vertices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "rigid": true,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 2,
+      "vertices": [
+        2,
+        1,
+        12,
+        13
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 3,
+      "vertices": [
+        3,
+        2,
+        15,
+        16
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 4,
+      "vertices": [
+        4,
+        3,
+        18,
+        19
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 5,
+      "vertices": [
+        5,
+        4,
+        21,
+        22
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 6,
+      "vertices": [
+        6,
+        5,
+        24,
+        7
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 7,
+      "vertices": [
+        1,
+        6,
+        9,
+        10
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 8,
+      "vertices": [
+        12,
+        1,
+        10,
+        11
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 9,
+      "vertices": [
+        15,
+        2,
+        13,
+        14
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 10,
+      "vertices": [
+        18,
+        3,
+        16,
+        17
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 11,
+      "vertices": [
+        21,
+        4,
+        19,
+        20
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 12,
+      "vertices": [
+        24,
+        5,
+        22,
+        23
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 13,
+      "vertices": [
+        9,
+        6,
+        7,
+        8
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    }
+  ],
+  "creases": [
+    {
+      "id": 1,
+      "v1": 1,
+      "v2": 2,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 38,
+      "stiffness": 1.15,
+      "width": 0.035
+    },
+    {
+      "id": 2,
+      "v1": 2,
+      "v2": 3,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 38,
+      "stiffness": 1.15,
+      "width": 0.035
+    },
+    {
+      "id": 3,
+      "v1": 3,
+      "v2": 4,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 38,
+      "stiffness": 1.15,
+      "width": 0.035
+    },
+    {
+      "id": 4,
+      "v1": 4,
+      "v2": 5,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 38,
+      "stiffness": 1.15,
+      "width": 0.035
+    },
+    {
+      "id": 5,
+      "v1": 5,
+      "v2": 6,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 38,
+      "stiffness": 1.15,
+      "width": 0.035
+    },
+    {
+      "id": 6,
+      "v1": 6,
+      "v2": 1,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 38,
+      "stiffness": 1.15,
+      "width": 0.035
+    },
+    {
+      "id": 7,
+      "v1": 1,
+      "v2": 12,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 8,
+      "v1": 1,
+      "v2": 10,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 9,
+      "v1": 2,
+      "v2": 15,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 10,
+      "v1": 2,
+      "v2": 13,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 11,
+      "v1": 3,
+      "v2": 18,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 12,
+      "v1": 3,
+      "v2": 16,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 13,
+      "v1": 4,
+      "v2": 21,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 14,
+      "v1": 4,
+      "v2": 19,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 15,
+      "v1": 5,
+      "v2": 24,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 16,
+      "v1": 5,
+      "v2": 22,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 17,
+      "v1": 6,
+      "v2": 9,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 18,
+      "v1": 6,
+      "v2": 7,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 34,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 19,
+      "v1": 7,
+      "v2": 8,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 20,
+      "v1": 8,
+      "v2": 9,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 21,
+      "v1": 9,
+      "v2": 10,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 22,
+      "v1": 10,
+      "v2": 11,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 23,
+      "v1": 11,
+      "v2": 12,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 24,
+      "v1": 12,
+      "v2": 13,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 25,
+      "v1": 13,
+      "v2": 14,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 26,
+      "v1": 14,
+      "v2": 15,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 27,
+      "v1": 15,
+      "v2": 16,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 28,
+      "v1": 16,
+      "v2": 17,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 29,
+      "v1": 17,
+      "v2": 18,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 30,
+      "v1": 18,
+      "v2": 19,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 31,
+      "v1": 19,
+      "v2": 20,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 32,
+      "v1": 20,
+      "v2": 21,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 33,
+      "v1": 21,
+      "v2": 22,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 34,
+      "v1": 22,
+      "v2": 23,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 35,
+      "v1": 23,
+      "v2": 24,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 36,
+      "v1": 24,
+      "v2": 7,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    }
+  ],
+  "connections": [],
+  "material": {
+    "name": "origami_paper",
+    "metallic": 0,
+    "smoothness": 0.25,
+    "doubleSided": true
+  },
+  "defaultCreaseWidth": 0.03,
+  "mountainCreaseColor": "#E53935",
+  "valleyCreaseColor": "#1565C0",
+  "boundaryCreaseColor": "#202020"
+}

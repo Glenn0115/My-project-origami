@@ -1,0 +1,926 @@
+{
+  "name": "Candidate_B_NoCut_Waterbomb_Maekawa",
+  "description": "单张十二边形六瓣水爆基底；中心顶点5山7谷，各内环顶点满足|M-V|=2。适合2至6舵机联动。",
+  "vertices": [
+    {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -2.25
+    },
+    {
+      "x": 1.125,
+      "y": 0,
+      "z": -1.9486
+    },
+    {
+      "x": 1.9486,
+      "y": 0,
+      "z": -1.125
+    },
+    {
+      "x": 2.25,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 1.9486,
+      "y": 0,
+      "z": 1.125
+    },
+    {
+      "x": 1.125,
+      "y": 0,
+      "z": 1.9486
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 2.25
+    },
+    {
+      "x": -1.125,
+      "y": 0,
+      "z": 1.9486
+    },
+    {
+      "x": -1.9486,
+      "y": 0,
+      "z": 1.125
+    },
+    {
+      "x": -2.25,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": -1.9486,
+      "y": 0,
+      "z": -1.125
+    },
+    {
+      "x": -1.125,
+      "y": 0,
+      "z": -1.9486
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -5
+    },
+    {
+      "x": 2.5,
+      "y": 0,
+      "z": -4.3301
+    },
+    {
+      "x": 4.3301,
+      "y": 0,
+      "z": -2.5
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 4.3301,
+      "y": 0,
+      "z": 2.5
+    },
+    {
+      "x": 2.5,
+      "y": 0,
+      "z": 4.3301
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 5
+    },
+    {
+      "x": -2.5,
+      "y": 0,
+      "z": 4.3301
+    },
+    {
+      "x": -4.3301,
+      "y": 0,
+      "z": 2.5
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": -4.3301,
+      "y": 0,
+      "z": -2.5
+    },
+    {
+      "x": -2.5,
+      "y": 0,
+      "z": -4.3301
+    }
+  ],
+  "faces": [
+    {
+      "id": 1,
+      "vertices": [
+        1,
+        2,
+        3
+      ],
+      "rigid": true,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 2,
+      "vertices": [
+        2,
+        1,
+        13
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 3,
+      "vertices": [
+        3,
+        2,
+        14,
+        15
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 4,
+      "vertices": [
+        14,
+        2,
+        13,
+        25
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 5,
+      "vertices": [
+        1,
+        3,
+        4
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 6,
+      "vertices": [
+        4,
+        3,
+        15,
+        16
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 7,
+      "vertices": [
+        1,
+        4,
+        5
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 8,
+      "vertices": [
+        5,
+        4,
+        16,
+        17
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 9,
+      "vertices": [
+        1,
+        5,
+        6
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 10,
+      "vertices": [
+        6,
+        5,
+        17,
+        18
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 11,
+      "vertices": [
+        1,
+        6,
+        7
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 12,
+      "vertices": [
+        7,
+        6,
+        18,
+        19
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 13,
+      "vertices": [
+        1,
+        7,
+        8
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 14,
+      "vertices": [
+        8,
+        7,
+        19,
+        20
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 15,
+      "vertices": [
+        1,
+        8,
+        9
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 16,
+      "vertices": [
+        9,
+        8,
+        20,
+        21
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 17,
+      "vertices": [
+        1,
+        9,
+        10
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 18,
+      "vertices": [
+        10,
+        9,
+        21,
+        22
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 19,
+      "vertices": [
+        1,
+        10,
+        11
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 20,
+      "vertices": [
+        11,
+        10,
+        22,
+        23
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 21,
+      "vertices": [
+        1,
+        11,
+        12
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    },
+    {
+      "id": 22,
+      "vertices": [
+        12,
+        11,
+        23,
+        24
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 23,
+      "vertices": [
+        1,
+        12,
+        13
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 24,
+      "vertices": [
+        13,
+        12,
+        24,
+        25
+      ],
+      "rigid": false,
+      "color": "#F4C542"
+    }
+  ],
+  "creases": [
+    {
+      "id": 1,
+      "v1": 1,
+      "v2": 2,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 2,
+      "v1": 2,
+      "v2": 3,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 3,
+      "v1": 2,
+      "v2": 14,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 4,
+      "v1": 14,
+      "v2": 15,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 5,
+      "v1": 1,
+      "v2": 3,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 6,
+      "v1": 3,
+      "v2": 4,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 7,
+      "v1": 3,
+      "v2": 15,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 8,
+      "v1": 15,
+      "v2": 16,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 9,
+      "v1": 1,
+      "v2": 4,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 10,
+      "v1": 4,
+      "v2": 5,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 11,
+      "v1": 4,
+      "v2": 16,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 12,
+      "v1": 16,
+      "v2": 17,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 13,
+      "v1": 1,
+      "v2": 5,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 14,
+      "v1": 5,
+      "v2": 6,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 15,
+      "v1": 5,
+      "v2": 17,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 16,
+      "v1": 17,
+      "v2": 18,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 17,
+      "v1": 1,
+      "v2": 6,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 18,
+      "v1": 6,
+      "v2": 7,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 19,
+      "v1": 6,
+      "v2": 18,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 20,
+      "v1": 18,
+      "v2": 19,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 21,
+      "v1": 1,
+      "v2": 7,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 22,
+      "v1": 7,
+      "v2": 8,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 23,
+      "v1": 7,
+      "v2": 19,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 24,
+      "v1": 19,
+      "v2": 20,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 25,
+      "v1": 1,
+      "v2": 8,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 26,
+      "v1": 8,
+      "v2": 9,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 27,
+      "v1": 8,
+      "v2": 20,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 28,
+      "v1": 20,
+      "v2": 21,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 29,
+      "v1": 1,
+      "v2": 9,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 30,
+      "v1": 9,
+      "v2": 10,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 31,
+      "v1": 9,
+      "v2": 21,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 32,
+      "v1": 21,
+      "v2": 22,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 33,
+      "v1": 1,
+      "v2": 10,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 34,
+      "v1": 10,
+      "v2": 11,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 35,
+      "v1": 10,
+      "v2": 22,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 36,
+      "v1": 22,
+      "v2": 23,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 37,
+      "v1": 1,
+      "v2": 11,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 38,
+      "v1": 11,
+      "v2": 12,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 39,
+      "v1": 11,
+      "v2": 23,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 40,
+      "v1": 23,
+      "v2": 24,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 41,
+      "v1": 1,
+      "v2": 12,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 42,
+      "v1": 12,
+      "v2": 13,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 43,
+      "v1": 12,
+      "v2": 24,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 44,
+      "v1": 24,
+      "v2": 25,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 45,
+      "v1": 1,
+      "v2": 13,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 42,
+      "stiffness": 1.2,
+      "width": 0.035
+    },
+    {
+      "id": 46,
+      "v1": 13,
+      "v2": 2,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 32,
+      "stiffness": 0.9,
+      "width": 0.035
+    },
+    {
+      "id": 47,
+      "v1": 13,
+      "v2": 25,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 36,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 48,
+      "v1": 25,
+      "v2": 14,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    }
+  ],
+  "connections": [],
+  "material": {
+    "name": "origami_paper",
+    "metallic": 0,
+    "smoothness": 0.25,
+    "doubleSided": true
+  },
+  "defaultCreaseWidth": 0.03,
+  "mountainCreaseColor": "#E53935",
+  "valleyCreaseColor": "#1565C0",
+  "boundaryCreaseColor": "#202020"
+}
