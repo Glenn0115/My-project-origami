@@ -40,6 +40,18 @@ public class OrigamiCrease
 
     }
     public Type type;
+
+    // 0 keeps legacy behaviour, 1 marks a servo-driven crease and 2 makes
+    // the hinge passive so it follows the mechanism without a spring target.
+    public enum DriveMode
+    {
+        Auto,
+        Actuated,
+        Passive
+    }
+    public DriveMode driveMode = DriveMode.Auto;
+    public int actuatorGroup = 0;
+
     public float restAngle;
     public float minAngle;
     public float maxAngle;

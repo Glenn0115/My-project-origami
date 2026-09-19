@@ -1,0 +1,322 @@
+{
+  "name": "Candidate_B_Waterbomb_4Module_MovableFan",
+  "description": "可动四模块单顶点扇形：8个刚性扇形面、8条放射折痕，无内环闭环；四个舵机分别驱动折痕1、3、5、7，其余折痕从动。中心3山5谷并满足Kawasaki条件。",
+  "vertices": [
+    {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": -5
+    },
+    {
+      "x": 3.5355,
+      "y": 0,
+      "z": -3.5355
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 3.5355,
+      "y": 0,
+      "z": 3.5355
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 5
+    },
+    {
+      "x": -3.5355,
+      "y": 0,
+      "z": 3.5355
+    },
+    {
+      "x": -5,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": -3.5355,
+      "y": 0,
+      "z": -3.5355
+    }
+  ],
+  "faces": [
+    {
+      "id": 1,
+      "vertices": [
+        1,
+        2,
+        3
+      ],
+      "rigid": true,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 2,
+      "vertices": [
+        1,
+        3,
+        4
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 3,
+      "vertices": [
+        1,
+        4,
+        5
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 4,
+      "vertices": [
+        1,
+        5,
+        6
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 5,
+      "vertices": [
+        1,
+        6,
+        7
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 6,
+      "vertices": [
+        1,
+        7,
+        8
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    },
+    {
+      "id": 7,
+      "vertices": [
+        1,
+        8,
+        9
+      ],
+      "rigid": false,
+      "color": "#F7C8D8"
+    },
+    {
+      "id": 8,
+      "vertices": [
+        1,
+        9,
+        2
+      ],
+      "rigid": false,
+      "color": "#FCE4EC"
+    }
+  ],
+  "creases": [
+    {
+      "id": 1,
+      "v1": 1,
+      "v2": 2,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 30,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 2,
+      "v1": 1,
+      "v2": 3,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 40,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 3,
+      "v1": 1,
+      "v2": 4,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 14.1421,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 4,
+      "v1": 1,
+      "v2": 5,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 40,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 5,
+      "v1": 1,
+      "v2": 6,
+      "type": 1,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 30,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 6,
+      "v1": 1,
+      "v2": 7,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 20,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 7,
+      "v1": 1,
+      "v2": 8,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 14.1421,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 8,
+      "v1": 1,
+      "v2": 9,
+      "type": 0,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 20,
+      "stiffness": 1,
+      "width": 0.035
+    },
+    {
+      "id": 9,
+      "v1": 2,
+      "v2": 3,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 10,
+      "v1": 3,
+      "v2": 4,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 11,
+      "v1": 4,
+      "v2": 5,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 12,
+      "v1": 5,
+      "v2": 6,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 13,
+      "v1": 6,
+      "v2": 7,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 14,
+      "v1": 7,
+      "v2": 8,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 15,
+      "v1": 8,
+      "v2": 9,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    },
+    {
+      "id": 16,
+      "v1": 9,
+      "v2": 2,
+      "type": 2,
+      "restAngle": 0,
+      "minAngle": 0,
+      "maxAngle": 0,
+      "stiffness": 1,
+      "width": 0.025
+    }
+  ],
+  "connections": [],
+  "material": {
+    "name": "origami_paper",
+    "metallic": 0,
+    "smoothness": 0.25,
+    "doubleSided": true
+  },
+  "defaultCreaseWidth": 0.03,
+  "mountainCreaseColor": "#E53935",
+  "valleyCreaseColor": "#1565C0",
+  "boundaryCreaseColor": "#202020"
+}

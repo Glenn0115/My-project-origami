@@ -1033,6 +1033,7 @@ GameObject:
   - component: {fileID: 239768126}
   - component: {fileID: 239768125}
   - component: {fileID: 239768128}
+  - component: {fileID: 239768129}
   m_Layer: 0
   m_Name: OrigamiSystem
   m_TagString: Untagged
@@ -1117,6 +1118,34 @@ MonoBehaviour:
   loadButton: {fileID: 596163517}
   statusText: {fileID: 0}
   origamiLoader: {fileID: 239768126}
+--- !u!114 &239768129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239768124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3d7a2f5e7b44f88a1c3d4e5f6071829, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  origamiController: {fileID: 239768125}
+  closedPulseUs: 1350
+  openPulseUs: 1650
+  firstPairDelay: 0.5
+  allOpenHold: 1.2
+  secondPairDelay: 0.5
+  allClosedHold: 1.2
+  loop: 1
+  servo1CreaseIds:
+  - 1
+  servo2CreaseIds:
+  - 3
+  servo3CreaseIds:
+  - 5
+  servo4CreaseIds:
+  - 7
 --- !u!1 &308911313
 GameObject:
   m_ObjectHideFlags: 0
@@ -1357,9 +1386,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 239768125}
-        m_TargetAssemblyTypeName: OrigamiController, Assembly-CSharp
-        m_MethodName: StartTorqueAutoFoldToMax
+      - m_Target: {fileID: 239768129}
+        m_TargetAssemblyTypeName: FourServoSequenceController, Assembly-CSharp
+        m_MethodName: ToggleServoSequence
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9250,7 +9279,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Auto_Simu
+  m_text: Auto / Reset
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

@@ -459,10 +459,11 @@ public class OrigamiLoader : MonoBehaviour
             float stiffnessScale = crease.stiffness > 0f
                 ? Mathf.Clamp(crease.stiffness, 0.25f, 4f)
                 : 1f;
+            bool isActuated = crease.driveMode == OrigamiCrease.DriveMode.Actuated;
             JointSpring spring = new JointSpring
             {
-                spring = (isDriver ? driverSpring : followerSpring) * stiffnessScale,
-                damper = isDriver ? driverDamper : followerDamper,
+                spring = (isDriver || isActuated ? driverSpring : followerSpring) * stiffnessScale,
+                damper = isDriver || isActuated ? driverDamper : followerDamper,
                 targetPosition = Mathf.Clamp(crease.restAngle, minAngle, maxAngle)
             };
             hinge.spring = spring;
@@ -475,6 +476,15 @@ public class OrigamiLoader : MonoBehaviour
                 faceBData.id,
                 isDriver,
                 isDriver ? 1f : 0.25f);
+            info.springDriveEnabled = crease.driveMode != OrigamiCrease.DriveMode.Passive;
+            info.actuatorGroup = Mathf.Clamp(crease.actuatorGroup, 0, 4);
+            if (isActuated)
+            {
+                info.isDriver = true;
+                info.driveWeight = 1f;
+            }
+            if (!info.springDriveEnabled)
+                hinge.useSpring = false;
 
             hinges.Add(hinge);
             connectedFaceIds.Add(faceAData.id);

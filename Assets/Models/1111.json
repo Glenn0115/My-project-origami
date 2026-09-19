@@ -1,0 +1,242 @@
+{
+    "name": "1111",
+    "description": "Point-edge based crease pattern",
+    "vertices": [
+        {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -5.0
+        },
+        {
+            "x": 3.5355000495910646,
+            "y": 0.0,
+            "z": -3.5355000495910646
+        },
+        {
+            "x": 5.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "x": 3.5355000495910646,
+            "y": 0.0,
+            "z": 3.5355000495910646
+        },
+        {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 5.0
+        },
+        {
+            "x": -3.5355000495910646,
+            "y": 0.0,
+            "z": 3.5355000495910646
+        },
+        {
+            "x": -5.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "x": -3.5355000495910646,
+            "y": 0.0,
+            "z": -3.5355000495910646
+        }
+    ],
+    "faces": [
+        {
+            "id": 1,
+            "vertices": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 2,
+            "vertices": [
+                2,
+                1,
+                8,
+                9
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 3,
+            "vertices": [
+                1,
+                4,
+                5,
+                6
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        },
+        {
+            "id": 4,
+            "vertices": [
+                1,
+                6,
+                7,
+                8
+            ],
+            "rigid": false,
+            "color": "#FFFFFF"
+        }
+    ],
+    "creases": [
+        {
+            "id": 1,
+            "v1": 1,
+            "v2": 2,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 30.0,
+            "stiffness": 1.0,
+            "width": 0.03500000014901161
+        },
+        {
+            "id": 2,
+            "v1": 1,
+            "v2": 4,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 14.14210033416748,
+            "stiffness": 1.0,
+            "width": 0.03500000014901161
+        },
+        {
+            "id": 3,
+            "v1": 1,
+            "v2": 6,
+            "type": 1,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 30.0,
+            "stiffness": 1.0,
+            "width": 0.03500000014901161
+        },
+        {
+            "id": 4,
+            "v1": 1,
+            "v2": 8,
+            "type": 0,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 14.14210033416748,
+            "stiffness": 1.0,
+            "width": 0.03500000014901161
+        },
+        {
+            "id": 5,
+            "v1": 2,
+            "v2": 3,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        },
+        {
+            "id": 6,
+            "v1": 3,
+            "v2": 4,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        },
+        {
+            "id": 7,
+            "v1": 4,
+            "v2": 5,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        },
+        {
+            "id": 8,
+            "v1": 5,
+            "v2": 6,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        },
+        {
+            "id": 9,
+            "v1": 6,
+            "v2": 7,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        },
+        {
+            "id": 10,
+            "v1": 7,
+            "v2": 8,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        },
+        {
+            "id": 11,
+            "v1": 8,
+            "v2": 9,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        },
+        {
+            "id": 12,
+            "v1": 9,
+            "v2": 2,
+            "type": 2,
+            "restAngle": 0.0,
+            "minAngle": 0.0,
+            "maxAngle": 0.0,
+            "stiffness": 1.0,
+            "width": 0.02500000037252903
+        }
+    ],
+    "connections": [],
+    "material": {
+        "name": "default",
+        "metallic": 0.0,
+        "smoothness": 0.5,
+        "doubleSided": true
+    },
+    "defaultCreaseWidth": 0.05000000074505806,
+    "mountainCreaseColor": "#FF0000",
+    "valleyCreaseColor": "#0000FF",
+    "boundaryCreaseColor": "#000000"
+}

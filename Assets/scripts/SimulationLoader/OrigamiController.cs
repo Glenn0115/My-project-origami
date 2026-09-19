@@ -255,6 +255,11 @@ public class OrigamiController : MonoBehaviour
             HingeJoint hinge = info != null ? info.hinge : null;
             if (!IsJointValid(hinge))
                 continue;
+            if (!info.springDriveEnabled)
+            {
+                hinge.useSpring = false;
+                continue;
+            }
 
             JointSpring spring = hinge.spring;
             float target = GetTargetAngle(hinge, requestedFoldProgress);
@@ -282,11 +287,18 @@ public class OrigamiController : MonoBehaviour
 
     private void FreezeSpringTargetsAtCurrentAngles()
     {
-        for (int i = 0; i < hinges.Count; i++)
+        for (int i = 0; i < hingeInfos.Count; i++)
         {
-            HingeJoint hinge = hinges[i];
+            OrigamiHingeInfo info = hingeInfos[i];
+            HingeJoint hinge = info != null ? info.hinge : null;
             if (!IsJointValid(hinge))
                 continue;
+
+            if (!info.springDriveEnabled)
+            {
+                hinge.useSpring = false;
+                continue;
+            }
 
             JointSpring spring = hinge.spring;
             spring.targetPosition = Mathf.Clamp(hinge.angle, hinge.limits.min, hinge.limits.max);
@@ -307,7 +319,7 @@ public class OrigamiController : MonoBehaviour
         int count = 0;
         for (int i = 0; i < hinges.Count; i++)
         {
-            if (!IsJointValid(hinges[i]))
+            if (!IsJointValid(hinges[i]) || !hingeInfos[i].springDriveEnabled)
                 continue;
             total += Mathf.Abs(hinges[i].limits.max - hinges[i].limits.min);
             count++;
@@ -326,7 +338,7 @@ public class OrigamiController : MonoBehaviour
         {
             OrigamiHingeInfo info = hingeInfos[i];
             HingeJoint hinge = info != null ? info.hinge : null;
-            if (IsJointValid(hinge) && info.isDriver)
+            if (IsJointValid(hinge) && info.springDriveEnabled && info.isDriver)
                 hasDriver = true;
         }
 
@@ -334,7 +346,7 @@ public class OrigamiController : MonoBehaviour
         {
             OrigamiHingeInfo info = hingeInfos[i];
             HingeJoint hinge = info != null ? info.hinge : null;
-            if (!IsJointValid(hinge) || (hasDriver && !info.isDriver))
+            if (!IsJointValid(hinge) || !info.springDriveEnabled || (hasDriver && !info.isDriver))
                 continue;
 
             float range = hinge.limits.max - hinge.limits.min;
@@ -360,7 +372,7 @@ public class OrigamiController : MonoBehaviour
         for (int i = 0; i < hingeInfos.Count; i++)
         {
             OrigamiHingeInfo info = hingeInfos[i];
-            if (info == null || !IsJointValid(info.hinge))
+            if (info == null || !info.springDriveEnabled || !IsJointValid(info.hinge))
                 continue;
             ConfigureHingeForTorqueAutoFold(info.hinge, info);
             if (info.isDriver)
@@ -380,7 +392,7 @@ public class OrigamiController : MonoBehaviour
             if (info == null || !IsJointValid(info.hinge))
                 continue;
             info.hinge.useLimits = true;
-            info.hinge.useSpring = true;
+            info.hinge.useSpring = info.springDriveEnabled;
         }
     }
 
@@ -390,7 +402,7 @@ public class OrigamiController : MonoBehaviour
             return;
 
         hinge.useLimits = true;
-        hinge.useSpring = !info.isDriver || !disableSpringDuringTorqueAutoFold;
+        hinge.useSpring = info.springDriveEnabled && (!info.isDriver || !disableSpringDuringTorqueAutoFold);
     }
 
     private void ApplyTorqueAutoFoldToMax()
@@ -405,7 +417,7 @@ public class OrigamiController : MonoBehaviour
         {
             OrigamiHingeInfo info = hingeInfos[i];
             HingeJoint hinge = info != null ? info.hinge : null;
-            if (info == null || !info.isDriver || !IsJointValid(hinge))
+            if (info == null || !info.springDriveEnabled || !info.isDriver || !IsJointValid(hinge))
                 continue;
 
             if (!torqueAutoFoldLastAngles.ContainsKey(hinge))

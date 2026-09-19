@@ -9,6 +9,8 @@ public sealed class OrigamiHingeInfo : MonoBehaviour
     public int faceBId;
     public bool hasFaceTopology;
     public bool isDriver = true;
+    public bool springDriveEnabled = true;
+    public int actuatorGroup;
 
     [Range(0.05f, 1f)]
     public float driveWeight = 1f;
