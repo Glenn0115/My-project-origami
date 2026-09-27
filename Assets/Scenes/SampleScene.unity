@@ -1129,6 +1129,12 @@ MonoBehaviour:
   loadButton: {fileID: 596163517}
   statusText: {fileID: 0}
   origamiLoader: {fileID: 239768126}
+  dxfImportMode: 0
+  dxfCoplanarityTolerance: 0.001
+  flatDxfOutputDirectory: 
+  spatialDxfOutputDirectory: 
+  rhinoZUpToUnityYUp: 1
+  centerSpatialDxfAtOrigin: 1
 --- !u!114 &239768129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1136,7 +1142,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 239768124}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 901ed3c332c8c3b408ea47c0057d5e33, type: 3}
   m_Name: 
@@ -1148,6 +1154,12 @@ MonoBehaviour:
   allOpenHold: 1.2
   secondPairDelay: 0.5
   allClosedHold: 1.2
+  valleyTargetAngle: 100
+  valleyTargetTolerance: 5
+  valleyOpenTimeout: 6
+  mountainDriveTorque: 8
+  mountainStallSeconds: 0.5
+  mountainDriveTimeout: 10
   loop: 1
   servo1CreaseIds: 01000000
   servo2CreaseIds: 03000000
@@ -7827,6 +7839,9 @@ MonoBehaviour:
   boundaryToggle: {fileID: 1606252323}
   creaseAttributePanel: {fileID: 655605429}
   loader: {fileID: 239768126}
+  dxfImportMode: 0
+  dxfCoplanarityTolerance: 0.001
+  flatDxfOutputDirectory: 
 --- !u!4 &1540719181
 Transform:
   m_ObjectHideFlags: 0
