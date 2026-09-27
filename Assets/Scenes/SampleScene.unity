@@ -1082,7 +1082,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07e1ab4663e10324e9f700f0e28680e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jsonPath: D:\0work\Develop\unity\Origami_Simulator\Assets\scripts\CustomPattern_minAngle0.json
+  jsonPath: D:\0work\Develop\unity\Origami_Simulator\Assets\Models\Spatial\927_spatial.json
   defaultMaterial: {fileID: 2100000, guid: e55f8004352ed514b97e088279147e95, type: 2}
   showCreases: 1
   useCustomColors: 1
@@ -1098,6 +1098,8 @@ MonoBehaviour:
   pinOneRootFace: 1
   modelNameText: {fileID: 0}
   modelDescriptionText: {fileID: 0}
+  driveLegacySpatialDxfWithExistingSlider: 1
+  legacySpatialDxfSliderTravelAngle: 180
 --- !u!4 &239768127
 Transform:
   m_ObjectHideFlags: 0
@@ -1135,6 +1137,8 @@ MonoBehaviour:
   spatialDxfOutputDirectory: 
   rhinoZUpToUnityYUp: 1
   centerSpatialDxfAtOrigin: 1
+  driveSpatialDxfWithExistingSlider: 1
+  spatialDxfSliderTravelAngle: 180
 --- !u!114 &239768129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1161,10 +1165,6 @@ MonoBehaviour:
   mountainStallSeconds: 0.5
   mountainDriveTimeout: 10
   loop: 1
-  servo1CreaseIds: 01000000
-  servo2CreaseIds: 03000000
-  servo3CreaseIds: 05000000
-  servo4CreaseIds: 07000000
 --- !u!1 &308911313
 GameObject:
   m_ObjectHideFlags: 0
@@ -7196,7 +7196,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1367072108}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 1
+  m_MaxValue: 180
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
