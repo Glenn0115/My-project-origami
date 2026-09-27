@@ -204,3 +204,6 @@ git push
 git remote add origin https://github.com/Glenn0115/My-project-origami.git
 git push -u origin main
 ```
+
+
+后续：重新设置铰链放置位置，要与山谷折痕相关
