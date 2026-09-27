@@ -1,4 +1,5 @@
 using System.IO;
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -34,6 +35,14 @@ public class OrigamiLoader : MonoBehaviour
     [Header("UI 控制")]
     public Text modelNameText;
     public Text modelDescriptionText;
+
+    [Header("空间 DXF 滑条兼容")]
+    [Tooltip("旧版 *_spatial.json 没有驱动元数据时，使用现有滑条直接驱动其 M/V 折痕。")]
+    public bool driveLegacySpatialDxfWithExistingSlider = true;
+
+    [Range(0f, 180f)]
+    [Tooltip("旧版空间 DXF 的滑条 0→180 对应折痕目标角度。")]
+    public float legacySpatialDxfSliderTravelAngle = 180f;
 
     private OrigamiModel model;
     private List<Vector3> vertices = new();
@@ -89,6 +98,9 @@ public class OrigamiLoader : MonoBehaviour
             return;
         }
 
+        if (PrepareSpatialDxfSliderDrive(jsonFullPath))
+            ResetFoldStateAndSlider();
+
         UpdateUIInfo();
 
         vertices.Clear();
@@ -109,6 +121,86 @@ public class OrigamiLoader : MonoBehaviour
 
 
         CreateCreasesAndConnections();
+    }
+
+    // SimulationLoader uses this to give legacy *_spatial.json files the same
+    // safe default as a newly imported spatial DXF. New files carry their own
+    // metadata and are not overridden by this fallback.
+    public void ConfigureLegacySpatialDxfSliderDrive(bool enabled, float travelAngle)
+    {
+        driveLegacySpatialDxfWithExistingSlider = enabled;
+        legacySpatialDxfSliderTravelAngle = Mathf.Clamp(travelAngle, 0f, 180f);
+    }
+
+    private bool PrepareSpatialDxfSliderDrive(string jsonFullPath)
+    {
+        if (!IsSpatialDxfModel(jsonFullPath) || model.creases == null)
+            return false;
+
+        bool hasImportMetadata = model.spatialDxfImportVersion > 0;
+        bool enableSliderDrive = hasImportMetadata
+            ? model.spatialDxfSliderDriveEnabled
+            : driveLegacySpatialDxfWithExistingSlider;
+        if (!enableSliderDrive)
+            return false;
+
+        float travelAngle = hasImportMetadata
+            ? model.spatialDxfSliderTravelAngle
+            : legacySpatialDxfSliderTravelAngle;
+        travelAngle = Mathf.Clamp(travelAngle, 0f, 180f);
+
+        int drivenCreaseCount = 0;
+        for (int i = 0; i < model.creases.Count; i++)
+        {
+            OrigamiCrease crease = model.creases[i];
+            if (crease == null || crease.type == OrigamiCrease.Type.Boundary)
+                continue;
+
+            // This is deliberately the existing generic fold-drive path, not
+            // a Kresling-specific controller. The M/V hinge-owner rule below
+            // still determines the physical folding direction.
+            crease.driveMode = OrigamiCrease.DriveMode.Auto;
+            crease.restAngle = 0f;
+            crease.minAngle = 0f;
+            crease.maxAngle = travelAngle;
+            drivenCreaseCount++;
+        }
+
+        Debug.Log($"[OrigamiLoader] Spatial slider drive enabled for {drivenCreaseCount} M/V creases (0° → {travelAngle:F1}°).");
+        return drivenCreaseCount > 0;
+    }
+
+    private bool IsSpatialDxfModel(string jsonFullPath)
+    {
+        if (model.spatialDxfImportVersion > 0)
+            return true;
+
+        if (!string.IsNullOrEmpty(model.description)
+            && model.description.StartsWith("Spatial M/V/B curve import", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        string fileName = Path.GetFileNameWithoutExtension(jsonFullPath);
+        return !string.IsNullOrEmpty(fileName)
+            && fileName.EndsWith("_spatial", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void ResetFoldStateAndSlider()
+    {
+        OrigamiController controller = GetComponent<OrigamiController>();
+        if (controller == null)
+            return;
+
+        // A sequence from a previously loaded 920 model must release the
+        // shared controller before the manual spatial-slider path takes over.
+        FourServoSequenceController servoSequence = FindObjectOfType<FourServoSequenceController>();
+        if (servoSequence != null && servoSequence.IsRunning)
+            servoSequence.StopServoSequence();
+
+        controller.ResetFoldState(0f);
+
+        SliderController sliderController = FindObjectOfType<SliderController>();
+        if (sliderController != null && sliderController.origami == controller)
+            sliderController.UpdateSliderValue();
     }
 
 

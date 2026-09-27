@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class SliderController : MonoBehaviour
 {
+    private const float SliderAngleMax = 180f;
+
     public Slider slider;
     public OrigamiController origami;
     public FourServoSequenceController servoSequence;
@@ -16,7 +18,7 @@ public class SliderController : MonoBehaviour
             servoSequence = FindObjectOfType<FourServoSequenceController>();
 
         slider.minValue = 0f;
-        slider.maxValue = 1f;
+        slider.maxValue = SliderAngleMax;
         slider.SetValueWithoutNotify(0f);
         origami.SetFoldProgress(0f);
         slider.onValueChanged.AddListener(OnSliderChanged);
@@ -39,7 +41,7 @@ public class SliderController : MonoBehaviour
         if (servoSequence != null && servoSequence.IsRunning)
             servoSequence.StopServoSequence();
 
-        origami.SetFoldProgress(value);
+        origami.SetFoldProgress(Mathf.InverseLerp(slider.minValue, slider.maxValue, value));
     }
 
     public void UpdateSliderValue()
@@ -47,6 +49,7 @@ public class SliderController : MonoBehaviour
         if (slider == null || origami == null)
             return;
 
-        slider.SetValueWithoutNotify(Mathf.Clamp01(origami.foldProgress));
+        slider.SetValueWithoutNotify(
+            Mathf.Lerp(slider.minValue, slider.maxValue, Mathf.Clamp01(origami.foldProgress)));
     }
 }

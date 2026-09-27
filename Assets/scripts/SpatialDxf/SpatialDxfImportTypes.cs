@@ -18,8 +18,12 @@ public sealed class SpatialDxfImportOptions
     [Tooltip("Convert Rhino/DXF Z-up coordinates into Unity's Y-up coordinates without flattening them.")]
     public bool rhinoZUpToUnityYUp = true;
 
-    [Tooltip("Keep imported M/V joints passive until the dedicated Kresling controller drives them.")]
+    [Tooltip("Keep imported M/V joints passive. Turn this off to let the existing global fold slider drive them.")]
     public bool markImportedCreasesPassive = true;
+
+    [Range(0f, 180f)]
+    [Tooltip("When imported M/V joints use the existing fold slider, this is the target angle at slider value 1. Slider value 0 always keeps the imported pose.")]
+    public float sliderDriveTravelAngle = 180f;
 }
 
 /// <summary>

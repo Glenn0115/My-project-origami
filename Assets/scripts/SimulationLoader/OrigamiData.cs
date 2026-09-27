@@ -87,6 +87,13 @@ public class OrigamiModel
     public List<OrigamiFace> faces;
     public List<OrigamiCrease> creases;
     public List<OrigamiConnection> connections;
+
+    // Written by the spatial DXF importer. Version 0 means an older JSON
+    // without this metadata, so OrigamiLoader can apply its compatibility path.
+    public int spatialDxfImportVersion = 0;
+    public bool spatialDxfSliderDriveEnabled = false;
+    public float spatialDxfSliderTravelAngle = 0f;
+
     public OrigamiMaterial material = new OrigamiMaterial();
     
     // 全局设置

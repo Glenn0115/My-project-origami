@@ -43,6 +43,14 @@ public class SimulationLoader: MonoBehaviour
     [Tooltip("ת����ģ�Ͱ�Χ�����ķŵ� Unity ԭ�㡣")]
     public bool centerSpatialDxfAtOrigin = true;
 
+    [Header("Spatial DXF Slider Drive")]
+    [Tooltip("Let the existing fold-progress slider drive M/V creases imported from a spatial DXF. Slider value 0 holds the imported pose.")]
+    public bool driveSpatialDxfWithExistingSlider = true;
+
+    [Range(0f, 180f)]
+    [Tooltip("Target hinge angle at slider value 180 for a spatial DXF import. Slider value 0 always keeps the imported pose.")]
+    public float spatialDxfSliderTravelAngle = 180f;
+
     private void Awake()
     {
         // �Զ����ҳ����е�OrigamiLoader�����û���ֶ�ָ���Ļ�
@@ -114,6 +122,10 @@ public class SimulationLoader: MonoBehaviour
             return;
         }
 
+        origamiLoader.ConfigureLegacySpatialDxfSliderDrive(
+            driveSpatialDxfWithExistingSlider,
+            spatialDxfSliderTravelAngle);
+
         if (pathInputField == null || string.IsNullOrEmpty(pathInputField.text))
         {
             SetStatus("������������Ч���ļ�·����", Color.red);
@@ -163,9 +175,8 @@ public class SimulationLoader: MonoBehaviour
             {
                 rhinoZUpToUnityYUp = rhinoZUpToUnityYUp,
                 centerAtOrigin = centerSpatialDxfAtOrigin,
-                // �ռ� DXF ���Ѿ��ۺõĿ��գ���ר�� Kresling ����������ǰ��
-                // ���þɵ�ͳһ foldProgress �����������н�����
-                markImportedCreasesPassive = true
+                markImportedCreasesPassive = !driveSpatialDxfWithExistingSlider,
+                sliderDriveTravelAngle = spatialDxfSliderTravelAngle
             }
         };
 

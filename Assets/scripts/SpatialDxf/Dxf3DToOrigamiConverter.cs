@@ -124,6 +124,7 @@ public static class Dxf3DToOrigamiConverter
         }
 
         List<OrigamiCrease> outputCreases = BuildOutputCreases(topology.edges, options, result);
+        float sliderDriveTravelAngle = Mathf.Clamp(options.sliderDriveTravelAngle, 0f, 180f);
         if (result.mountainCount == 0 && result.valleyCount == 0)
         {
             result.warnings.Add(
@@ -140,6 +141,9 @@ public static class Dxf3DToOrigamiConverter
             faces = faceResult.faces,
             creases = outputCreases,
             connections = new List<OrigamiConnection>(),
+            spatialDxfImportVersion = 1,
+            spatialDxfSliderDriveEnabled = !options.markImportedCreasesPassive,
+            spatialDxfSliderTravelAngle = sliderDriveTravelAngle,
             material = new OrigamiMaterial
             {
                 name = "default",
@@ -273,21 +277,29 @@ public static class Dxf3DToOrigamiConverter
             else if (type == OrigamiCrease.Type.Valley) result.valleyCount++;
             else result.boundaryCount++;
 
+            // A HingeJoint treats the pose at creation as its zero-angle pose.
+            // For direct slider drive, slider value 0 therefore holds the imported
+            // spatial pose and value 1 advances every M/V hinge to the configured
+            // common target angle. Boundary edges are never driven.
+            bool useSliderDrive = type != OrigamiCrease.Type.Boundary
+                && !options.markImportedCreasesPassive;
+            float sliderTravelAngle = Mathf.Clamp(options.sliderDriveTravelAngle, 0f, 180f);
+
             creases.Add(new OrigamiCrease
             {
                 id = i + 1,
                 v1 = edge.v1 + 1,
                 v2 = edge.v2 + 1,
                 type = type,
-                // The imported DXF is a spatial snapshot. Until KreslingSpatialController is
-                // introduced, passive joints prevent OrigamiController from driving every fold
-                // toward the same legacy fold-progress target.
-                driveMode = options.markImportedCreasesPassive
-                    ? OrigamiCrease.DriveMode.Passive
-                    : OrigamiCrease.DriveMode.Auto,
+                driveMode = useSliderDrive
+                    ? OrigamiCrease.DriveMode.Auto
+                    : OrigamiCrease.DriveMode.Passive,
+                // The imported mesh pose is the HingeJoint zero pose. Keep slider
+                // progress 0 at that pose; M/V owner selection in OrigamiLoader
+                // already supplies the Mountain/Valley folding direction.
                 restAngle = 0f,
-                minAngle = -180f,
-                maxAngle = 180f,
+                minAngle = useSliderDrive ? 0f : -180f,
+                maxAngle = useSliderDrive ? sliderTravelAngle : 180f,
                 stiffness = 1f,
                 width = 0.02f
             });

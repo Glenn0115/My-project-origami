@@ -247,6 +247,23 @@ public class OrigamiController : MonoBehaviour
         lastFoldProgress = foldProgress;
     }
 
+    // Loading a new model must not inherit the last stable progress from the
+    // previous model. In particular, a first-frame physics warning otherwise
+    // restores the old model's target instead of the new model's zero pose.
+    public void ResetFoldState(float progress = 0f)
+    {
+        if (torqueAutoFoldActive)
+            StopTorqueAutoFoldToMax();
+
+        float resetProgress = Mathf.Clamp01(progress);
+        requestedFoldProgress = resetProgress;
+        appliedFoldProgress = resetProgress;
+        lastFoldProgress = resetProgress;
+        lastStableFoldProgress = resetProgress;
+        foldProgress = resetProgress;
+        dangerPauseApplied = false;
+    }
+
     private void ApplySpringDrive()
     {
         for (int i = 0; i < hingeInfos.Count; i++)

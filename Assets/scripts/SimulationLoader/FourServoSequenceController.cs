@@ -32,12 +32,6 @@ public sealed class FourServoSequenceController : MonoBehaviour
     [SerializeField] private float mountainDriveTimeout = 10f;
     [SerializeField] private bool loop = true;
 
-    [Header("Servo-to-crease mapping for the movable four-module B model")]
-    [SerializeField] private int[] servo1CreaseIds = { 1 };
-    [SerializeField] private int[] servo2CreaseIds = { 3 };
-    [SerializeField] private int[] servo3CreaseIds = { 5 };
-    [SerializeField] private int[] servo4CreaseIds = { 7 };
-
     private readonly Dictionary<int, HingeJoint> hingesByCreaseId = new Dictionary<int, HingeJoint>();
     private readonly Dictionary<HingeJoint, bool> passiveSpringStates = new Dictionary<HingeJoint, bool>();
     private readonly List<int>[] modelActuatorCreaseIds =
@@ -45,6 +39,7 @@ public sealed class FourServoSequenceController : MonoBehaviour
         new List<int>(), new List<int>(), new List<int>(), new List<int>()
     };
     private bool useThreeServoSequence;
+    private bool hasCompleteExplicitServoMapping;
     private Coroutine sequenceCoroutine;
     private bool abortRequested;
     private bool sequenceOwnsControllerState;
@@ -286,6 +281,7 @@ public sealed class FourServoSequenceController : MonoBehaviour
     private void RebuildHingeLookup()
     {
         hingesByCreaseId.Clear();
+        hasCompleteExplicitServoMapping = false;
         for (int i = 0; i < modelActuatorCreaseIds.Length; i++)
             modelActuatorCreaseIds[i].Clear();
 
@@ -300,33 +296,22 @@ public sealed class FourServoSequenceController : MonoBehaviour
                 modelActuatorCreaseIds[info.actuatorGroup - 1].Add(info.creaseId);
         }
 
-        // Compatibility fallback for manually edited 920.json files whose
-        // duplicated JSON keys may be read as actuatorGroup=0 by JsonUtility.
-        bool hasNoDeclaredGroups = true;
-        for (int i = 0; i < modelActuatorCreaseIds.Length; i++)
-            hasNoDeclaredGroups &= modelActuatorCreaseIds[i].Count == 0;
-
-        if (hasNoDeclaredGroups
-            && hingesByCreaseId.ContainsKey(10)
-            && hingesByCreaseId.ContainsKey(11)
-            && hingesByCreaseId.ContainsKey(12))
-        {
-            modelActuatorCreaseIds[0].Add(11); // Valley 1
-            modelActuatorCreaseIds[1].Add(12); // Valley 2
-            modelActuatorCreaseIds[2].Add(10); // Mountain
-            Debug.LogWarning("[ServoSequence] 920 actuator metadata was missing; using crease fallback 11, 12, then 10.");
-        }
-
-        useThreeServoSequence = modelActuatorCreaseIds[0].Count > 0
+        bool hasThreeServoMapping = modelActuatorCreaseIds[0].Count > 0
             && modelActuatorCreaseIds[1].Count > 0
             && modelActuatorCreaseIds[2].Count > 0
             && modelActuatorCreaseIds[3].Count == 0;
+        bool hasFourServoMapping = modelActuatorCreaseIds[0].Count > 0
+            && modelActuatorCreaseIds[1].Count > 0
+            && modelActuatorCreaseIds[2].Count > 0
+            && modelActuatorCreaseIds[3].Count > 0;
+        useThreeServoSequence = hasThreeServoMapping;
+        hasCompleteExplicitServoMapping = hasThreeServoMapping || hasFourServoMapping;
 
         Debug.Log($"[ServoSequence] Hinges={hingesByCreaseId.Count}, groups="
             + $"{modelActuatorCreaseIds[0].Count}/"
             + $"{modelActuatorCreaseIds[1].Count}/"
             + $"{modelActuatorCreaseIds[2].Count}/"
-            + $"{modelActuatorCreaseIds[3].Count}, threeServo={useThreeServoSequence}.");
+            + $"{modelActuatorCreaseIds[3].Count}, threeServo={useThreeServoSequence}, explicit={hasCompleteExplicitServoMapping}.");
     }
 
     private IEnumerator WaitForValleysNearTarget()
@@ -441,29 +426,7 @@ public sealed class FourServoSequenceController : MonoBehaviour
 
     private bool HasCompleteServoMapping()
     {
-        if (useThreeServoSequence)
-        {
-            return HasMappedHinge(GetCreaseIds(0))
-                && HasMappedHinge(GetCreaseIds(1))
-                && HasMappedHinge(GetCreaseIds(2));
-        }
-
-        return HasMappedHinge(GetCreaseIds(0))
-            && HasMappedHinge(GetCreaseIds(1))
-            && HasMappedHinge(GetCreaseIds(2))
-            && HasMappedHinge(GetCreaseIds(3));
-    }
-
-    private bool HasMappedHinge(int[] creaseIds)
-    {
-        if (creaseIds == null || creaseIds.Length == 0)
-            return false;
-        for (int i = 0; i < creaseIds.Length; i++)
-        {
-            if (!hingesByCreaseId.TryGetValue(creaseIds[i], out HingeJoint hinge) || hinge == null)
-                return false;
-        }
-        return true;
+        return hasCompleteExplicitServoMapping;
     }
 
     private void SetAllServos(float pulseUs)
@@ -524,14 +487,9 @@ public sealed class FourServoSequenceController : MonoBehaviour
             && modelActuatorCreaseIds[channel].Count > 0)
             return modelActuatorCreaseIds[channel].ToArray();
 
-        switch (channel)
-        {
-            case 0: return servo1CreaseIds;
-            case 1: return servo2CreaseIds;
-            case 2: return servo3CreaseIds;
-            case 3: return servo4CreaseIds;
-            default: return new int[0];
-        }
+        // Never infer actuators from generic crease IDs: spatial Kresling
+        // imports may happen to contain the same IDs as a 920 model.
+        return new int[0];
     }
 
     private int ActiveChannelCount { get { return useThreeServoSequence ? 3 : 4; } }
