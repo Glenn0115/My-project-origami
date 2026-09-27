@@ -95,7 +95,6 @@ public class OrigamiModel
     public float spatialDxfSliderTravelAngle = 0f;
 
     public OrigamiMaterial material = new OrigamiMaterial();
-    public bool elasticFlattenEnabled = false;
     
     // 全局设置
     public float defaultCreaseWidth = 0.02f;

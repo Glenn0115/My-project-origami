@@ -1087,10 +1087,7 @@ MonoBehaviour:
   showCreases: 1
   useCustomColors: 1
   creaseMaterial: {fileID: 2100000, guid: dc6a09eac175ca4428c70d728fb93a21, type: 2}
-  colliderThickness: 0.001
-  ignoreInternalFaceCollisions: 1
-  enableElasticFlatten: 0
-  elasticFlattenPlane: 0
+  colliderThickness: 0.01
   driverSpring: 60
   driverDamper: 10
   followerSpring: 3
@@ -1103,7 +1100,6 @@ MonoBehaviour:
   modelDescriptionText: {fileID: 0}
   driveLegacySpatialDxfWithExistingSlider: 1
   legacySpatialDxfSliderTravelAngle: 180
-  elasticFlattenProgress: 0
 --- !u!4 &239768127
 Transform:
   m_ObjectHideFlags: 0
