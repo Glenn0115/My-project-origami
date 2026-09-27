@@ -45,6 +45,17 @@ public class CreasePatternEditor : MonoBehaviour
 
     [SerializeField] private OrigamiLoader loader;   // ← 引用你的 OrigamiLoader
 
+    [Header("DXF 导入路由")]
+    [Tooltip("Auto 会自动识别 DXF；空间 DXF 在编辑页当前只会提示暂不支持。")]
+    public DxfImportMode dxfImportMode = DxfImportMode.Auto;
+
+    [Min(0.000001f)]
+    [Tooltip("DXF 端点偏离同一平面的最大容差；超过它会作为空间 DXF 导入。")]
+    public float dxfCoplanarityTolerance = Dxf3DToOrigamiConverter.DefaultCoplanarityTolerance;
+
+    [Tooltip("二维 DXF 生成 JSON 的目录。留空时使用 Assets/Models/Dxf2D。")]
+    public string flatDxfOutputDirectory = "";
+
     #endregion
 
     #region Internal Data Models (self-contained for JSON)
@@ -862,9 +873,32 @@ public class CreasePatternEditor : MonoBehaviour
 
     /// <summary>
     /// 从 JSON 或 DXF 文件加载折痕图案。
-    /// 如果是 DXF 文件，会自动调用 DxfToOrigamiConverter 转换为 JSON 后再加载。
+    /// DXF 会先进入共享路由：共面曲线走旧二维转换器；空间曲线会提示到模拟页导入。
     /// </summary>
     private void LoadFromJsonOrDxf()
+    {
+        LoadFromInput(dxfImportMode);
+    }
+
+    /// <summary>供未来“自动 DXF”按钮调用；默认加载按钮也会使用该逻辑。</summary>
+    public void LoadCurrentInputWithAutoDxfRouting()
+    {
+        LoadFromInput(DxfImportMode.Auto);
+    }
+
+    /// <summary>供未来“二维 DXF”按钮调用。非共面输入会安全地给出错误提示。</summary>
+    public void LoadCurrentInputAs2DDxf()
+    {
+        LoadFromInput(DxfImportMode.Flat2D);
+    }
+
+    /// <summary>供未来“空间 DXF”按钮调用；编辑页当前会提示该类型暂不支持。</summary>
+    public void LoadCurrentInputAs3DDxf()
+    {
+        LoadFromInput(DxfImportMode.Spatial3D);
+    }
+
+    private void LoadFromInput(DxfImportMode requestedDxfMode)
     {
         string fileName = loadFileInput != null ? loadFileInput.text.Trim() : "";
 
@@ -881,18 +915,46 @@ public class CreasePatternEditor : MonoBehaviour
             return;
         }
 
-        ClearAll();
-
-        // DXF → JSON 自动转换
         if (fullPath.EndsWith(".dxf", StringComparison.OrdinalIgnoreCase))
         {
-            if (!TryConvertDxfToJson(ref fullPath))
+            DxfImportAnalysis analysis = DxfImportRouter.Analyze(fullPath, dxfCoplanarityTolerance);
+            if (!string.IsNullOrEmpty(analysis.error))
             {
-                Debug.LogError("❌ DXF 转换失败，请确认文件格式正确");
+                Debug.LogError($"❌ DXF 分析失败: {analysis.error}");
+                LogDxfWarnings(analysis.warnings);
                 return;
             }
+
+            DxfImportMode resolvedMode = requestedDxfMode == DxfImportMode.Auto
+                ? analysis.recommendedMode
+                : requestedDxfMode;
+            if (resolvedMode == DxfImportMode.Spatial3D)
+            {
+                // 二维编辑器会把顶点强制拉回编辑平面，也不会维护空间刚性面；
+                // 因此此处只提示，不生成 JSON、不切换模式，也不清空用户正在编辑的内容。
+                Debug.LogWarning("[CreaseEditor] 当前编辑页暂不支持空间 DXF。请切换到模拟页导入，或导入平面的二维折痕图。");
+                LogDxfWarnings(analysis.warnings);
+                return;
+            }
+
+            DxfImportResult importResult = DxfImportRouter.Convert(
+                fullPath,
+                CreateDxfImportOptions(requestedDxfMode));
+
+            if (!importResult.success)
+            {
+                Debug.LogError($"❌ DXF 转换失败: {importResult.error}");
+                LogDxfWarnings(importResult);
+                return;
+            }
+
+            LogDxfWarnings(importResult);
+
+            fullPath = importResult.jsonPath;
         }
 
+        // 只有已确认能够被二维编辑器加载的 JSON 才清空当前画布；导入失败不会丢失当前工作。
+        ClearAll();
         LoadModelFromJsonFile(fullPath);
     }
 
@@ -901,7 +963,52 @@ public class CreasePatternEditor : MonoBehaviour
     {
         if (Path.IsPathRooted(fileName))
             return fileName;
-        return Path.Combine(Application.dataPath, "Models", fileName);
+
+        bool hasSeparator = fileName.IndexOfAny(new[] { '/', '\\' }) >= 0;
+        if (!hasSeparator)
+            return Path.Combine(Application.dataPath, "Models", fileName);
+
+        string normalized = fileName.Replace('\\', '/');
+        if (normalized.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+            normalized = normalized.Substring("Assets/".Length);
+
+        return Path.Combine(Application.dataPath, normalized);
+    }
+
+    private DxfImportOptions CreateDxfImportOptions(DxfImportMode requestedMode)
+    {
+        return new DxfImportOptions
+        {
+            mode = requestedMode,
+            flatOutputDirectory = ResolveDxfOutputDirectory(flatDxfOutputDirectory),
+            coplanarityTolerance = dxfCoplanarityTolerance
+        };
+    }
+
+    private static string ResolveDxfOutputDirectory(string configuredDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(configuredDirectory))
+            return null;
+
+        if (Path.IsPathRooted(configuredDirectory))
+            return configuredDirectory;
+
+        string normalized = configuredDirectory.Replace('\\', '/');
+        if (normalized.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+            normalized = normalized.Substring("Assets/".Length);
+
+        return Path.Combine(Application.dataPath, normalized);
+    }
+
+    private static void LogDxfWarnings(DxfImportResult importResult)
+    {
+        LogDxfWarnings(importResult.warnings);
+    }
+
+    private static void LogDxfWarnings(IEnumerable<string> warnings)
+    {
+        foreach (string warning in warnings)
+            Debug.LogWarning($"[DxfImport] {warning}");
     }
 
     /// <summary>
@@ -986,38 +1093,6 @@ public class CreasePatternEditor : MonoBehaviour
         int boundaryCount = creases.Count(c => c.creaseType == CreaseType.Boundary);
         Debug.Log($"✅ 数据加载完成: 顶点数={vertices.Count}, 折痕数={creases.Count} (Mountain:{mountainCount} Valley:{valleyCount} Boundary:{boundaryCount})");
     }
-
-#if UNITY_EDITOR
-    /// <summary>
-    /// 将 DXF 文件转换为 JSON 文件。直接调用 DxfToJsonConverter。
-    /// </summary>
-    private static bool TryConvertDxfToJson(ref string filePath)
-    {
-        if (!filePath.EndsWith(".dxf", StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        try
-        {
-            string dir = Path.GetDirectoryName(filePath);
-            string name = Path.GetFileNameWithoutExtension(filePath);
-
-            // 直接调用 DxfToJsonConverter（无需反射）
-            if (!DxfToJsonConverter.Convert(filePath, dir, name))
-            {
-                Debug.LogError("[CreaseEditor] DXF 转换失败，请确认文件格式正确");
-                return false;
-            }
-
-            filePath = Path.Combine(dir, name + ".json");
-            return true;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[CreaseEditor] DXF 转换失败: {e.Message}");
-            return false;
-        }
-    }
-#endif
 
     public List<Vector3> GetCurrentVertices()
     {

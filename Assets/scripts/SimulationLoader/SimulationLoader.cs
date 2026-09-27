@@ -1,37 +1,59 @@
+using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// ¼ÓÔØ¿ØÖÆÆ÷£ºÌá¹©UI½çÃæ£¬ÈÃÓÃ»§ÊäÈëÎÄ¼þÂ·¾¶²¢µ÷ÓÃOrigamiLoader¼ÓÔØÄ£ÐÍ¡£
+/// ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á¹©UIï¿½ï¿½ï¿½æ£¬ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½OrigamiLoaderï¿½ï¿½ï¿½ï¿½Ä£ï¿½Í¡ï¿½
 /// </summary>
 public class SimulationLoader: MonoBehaviour
 {
-    [Header("UI ÔªËØ")]
-    [Tooltip("ÓÃÓÚÊäÈëÎÄ¼þÂ·¾¶µÄÊäÈë¿ò")]
+    [Header("UI Ôªï¿½ï¿½")]
+    [Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public TMP_InputField pathInputField;
 
-    [Tooltip("´¥·¢¼ÓÔØµÄ°´Å¥")]
+    [Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ØµÄ°ï¿½Å¥")]
     public Button loadButton;
 
-    [Tooltip("ÏÔÊ¾¼ÓÔØ×´Ì¬ÐÅÏ¢µÄÎÄ±¾")]
+    [Tooltip("ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Ä±ï¿½")]
     public TextMeshProUGUI statusText;
 
-    [Header("Ä£ÐÍ¼ÓÔØÆ÷")]
-    [Tooltip("³¡¾°ÖÐ¸ºÔðÊµ¼Ê¼ÓÔØÄ£ÐÍµÄOrigamiLoaderÊµÀý")]
+    [Header("Ä£ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    [Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½Ð¸ï¿½ï¿½ï¿½Êµï¿½Ê¼ï¿½ï¿½ï¿½Ä£ï¿½Íµï¿½OrigamiLoaderÊµï¿½ï¿½")]
     public OrigamiLoader origamiLoader;
+
+    [Header("DXF ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½")]
+    [Tooltip("Autoï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ûºï¿½Í¼ï¿½ß¾É¶ï¿½Î¬×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¿Õ¼ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    public DxfImportMode dxfImportMode = DxfImportMode.Auto;
+
+    [Min(0.000001f)]
+    [Tooltip("DXF ï¿½Ëµï¿½Æ«ï¿½ï¿½Í¬Ò»Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý²î£»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Õ¼ï¿½ DXF ï¿½ï¿½ï¿½ë¡£")]
+    public float dxfCoplanarityTolerance = Dxf3DToOrigamiConverter.DefaultCoplanarityTolerance;
+
+    [Tooltip("ï¿½ï¿½Î¬ DXF ï¿½ï¿½ï¿½ï¿½ JSON ï¿½ï¿½Ä¿Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ê¹ï¿½ï¿½ Assets/Models/Dxf2Dï¿½ï¿½")]
+    public string flatDxfOutputDirectory = "";
+
+    [Tooltip("ï¿½Õ¼ï¿½ DXF ï¿½ï¿½ï¿½ï¿½ JSON ï¿½ï¿½Ä¿Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ê¹ï¿½ï¿½ Assets/Models/Spatialï¿½ï¿½")]
+    public string spatialDxfOutputDirectory = "";
+
+    [Tooltip("Rhino/DXF Í¨ï¿½ï¿½ï¿½ï¿½ Z ï¿½ï¿½ï¿½ï¿½ï¿½Ï£ï¿½Unity ï¿½ï¿½ Y ï¿½ï¿½ï¿½ï¿½ï¿½Ï¡ï¿½")]
+    public bool rhinoZUpToUnityYUp = true;
+
+    [Tooltip("×ªï¿½ï¿½ï¿½ï¿½Ä£ï¿½Í°ï¿½Î§ï¿½ï¿½ï¿½ï¿½ï¿½Ä·Åµï¿½ Unity Ô­ï¿½ã¡£")]
+    public bool centerSpatialDxfAtOrigin = true;
 
     private void Awake()
     {
-        // ×Ô¶¯²éÕÒ³¡¾°ÖÐµÄOrigamiLoader£¬Èç¹ûÃ»ÓÐÊÖ¶¯Ö¸¶¨µÄ»°
+        // ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½Ò³ï¿½ï¿½ï¿½ï¿½Ðµï¿½OrigamiLoaderï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Ö¶ï¿½Ö¸ï¿½ï¿½ï¿½Ä»ï¿½
         if (origamiLoader == null)
         {
             origamiLoader = FindObjectOfType<OrigamiLoader>();
             if (origamiLoader == null)
             {
-                SetStatus("´íÎó£º³¡¾°ÖÐÎ´ÕÒµ½ OrigamiLoader ÊµÀý£¡", Color.red);
-                Debug.LogError("LoaderController: ÎÞ·¨ÕÒµ½ OrigamiLoader ×é¼þ¡£");
-                // ½ûÓÃ°´Å¥£¬·ÀÖ¹±¨´í
+                SetStatus("ï¿½ï¿½ï¿½ó£º³ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½Òµï¿½ OrigamiLoader Êµï¿½ï¿½ï¿½ï¿½", Color.red);
+                Debug.LogError("LoaderController: ï¿½Þ·ï¿½ï¿½Òµï¿½ OrigamiLoader ï¿½ï¿½ï¿½ï¿½ï¿½");
+                // ï¿½ï¿½ï¿½Ã°ï¿½Å¥ï¿½ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½
                 if (loadButton != null)
                     loadButton.interactable = false;
             }
@@ -40,17 +62,17 @@ public class SimulationLoader: MonoBehaviour
 
     private void Start()
     {
-        // °ó¶¨°´Å¥µÄµã»÷ÊÂ¼þ
+        // ï¿½ó¶¨°ï¿½Å¥ï¿½Äµï¿½ï¿½ï¿½Â¼ï¿½
         if (loadButton != null)
         {
             loadButton.onClick.AddListener(OnLoadButtonClicked);
         }
 
-        // ÉèÖÃÄ¬ÈÏ×´Ì¬
+        // ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½ï¿½×´Ì¬
         if (origamiLoader != null)
         {
-            SetStatus("ÇëÊäÈëÄ£ÐÍÂ·¾¶²¢µã»÷¼ÓÔØ", Color.white);
-            // ¿ÉÒÔ½«OrigamiLoaderµÄÄ¬ÈÏÂ·¾¶ÉèÖÃµ½ÊäÈë¿òÖÐ
+            SetStatus("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", Color.white);
+            // ï¿½ï¿½ï¿½Ô½ï¿½OrigamiLoaderï¿½ï¿½Ä¬ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (pathInputField != null && !string.IsNullOrEmpty(origamiLoader.jsonPath))
             {
                 pathInputField.text = origamiLoader.jsonPath;
@@ -59,42 +81,152 @@ public class SimulationLoader: MonoBehaviour
     }
 
     /// <summary>
-    /// µ±¼ÓÔØ°´Å¥±»µã»÷Ê±µ÷ÓÃ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½Ø°ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void OnLoadButtonClicked()
     {
+        LoadCurrentInput(dxfImportMode);
+    }
+
+    /// <summary>ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ DXFï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½Ã¡ï¿½</summary>
+    public void LoadCurrentInputWithAutoDxfRouting()
+    {
+        LoadCurrentInput(DxfImportMode.Auto);
+    }
+
+    /// <summary>ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¬ DXFï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½Ã¡ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á°²È«ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½</summary>
+    public void LoadCurrentInputAs2DDxf()
+    {
+        LoadCurrentInput(DxfImportMode.Flat2D);
+    }
+
+    /// <summary>ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½ DXFï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½Ã¡ï¿½</summary>
+    public void LoadCurrentInputAs3DDxf()
+    {
+        LoadCurrentInput(DxfImportMode.Spatial3D);
+    }
+
+    private void LoadCurrentInput(DxfImportMode requestedDxfMode)
+    {
         if (origamiLoader == null)
         {
-            SetStatus("´íÎó£ºOrigamiLoader Î´¾ÍÐ÷£¡", Color.red);
+            SetStatus("ï¿½ï¿½ï¿½ï¿½OrigamiLoader Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", Color.red);
             return;
         }
 
         if (pathInputField == null || string.IsNullOrEmpty(pathInputField.text))
         {
-            SetStatus("´íÎó£ºÇëÊäÈëÓÐÐ§µÄÎÄ¼þÂ·¾¶£¡", Color.red);
+            SetStatus("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Ä¼ï¿½Â·ï¿½ï¿½ï¿½ï¿½", Color.red);
             return;
         }
 
         string userPath = pathInputField.text.Trim();
 
-        // ÕâÀï¿ÉÒÔÌí¼ÓÂ·¾¶ÑéÖ¤Âß¼­£¬±ÈÈç¼ì²éÂ·¾¶¸ñÊ½µÈ
-        // ×¢Òâ£ºOrigamiLoader.LoadModel»á½«Â·¾¶ÓëApplication.dataPath½áºÏ
-        // ËùÒÔÓÃ»§Ó¦¸ÃÊäÈëÏà¶ÔAssetsµÄÂ·¾¶£¬ÀýÈç "Models/miura0.json"
+        // DXF Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½/Ç¿ï¿½ï¿½Ñ¡ï¿½ï¿½É¶ï¿½Î¬ï¿½ï¿½ï¿½Â¿Õ¼ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½JSON Ô­ï¿½ï¿½ï¿½ï¿½ï¿½Ø¡ï¿½
+        if (userPath.EndsWith(".dxf", StringComparison.OrdinalIgnoreCase))
+        {
+            ImportDxfAndLoad(userPath, requestedDxfMode);
+            return;
+        }
 
-        SetStatus($"ÕýÔÚ¼ÓÔØ: {userPath} ...", Color.yellow);
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½
+        // ×¢ï¿½â£ºOrigamiLoader.LoadModelï¿½á½«Â·ï¿½ï¿½ï¿½ï¿½Application.dataPathï¿½ï¿½ï¿½
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Assetsï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ "Models/miura0.json"
 
-        // µ÷ÓÃOrigamiLoaderµÄ¼ÓÔØ·½·¨
+        SetStatus($"ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½: {userPath} ...", Color.yellow);
+
+        // ï¿½ï¿½ï¿½ï¿½OrigamiLoaderï¿½Ä¼ï¿½ï¿½Ø·ï¿½ï¿½ï¿½
         origamiLoader.LoadModel(userPath);
 
-        // ÌáÊ¾¼ÓÔØÍê³É£¨Êµ¼Ê³É¹¦Óë·ñÈ¡¾öÓÚOrigamiLoaderÄÚ²¿£©
-        SetStatus($"¼ÓÔØÖ¸ÁîÒÑ·¢³ö: {userPath}", Color.green);
+        // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½Êµï¿½Ê³É¹ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½OrigamiLoaderï¿½Ú²ï¿½ï¿½ï¿½
+        SetStatus($"ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½: {userPath}", Color.green);
+    }
+
+    private void ImportDxfAndLoad(string userPath, DxfImportMode requestedMode)
+    {
+        string sourcePath = ResolveInputPath(userPath);
+        if (!File.Exists(sourcePath))
+        {
+            SetStatus($"Î´ï¿½Òµï¿½ DXF ï¿½Ä¼ï¿½: {sourcePath}", Color.red);
+            return;
+        }
+
+        SetStatus($"ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½ DXF: {Path.GetFileName(sourcePath)} ...", Color.yellow);
+
+        DxfImportOptions options = new DxfImportOptions
+        {
+            mode = requestedMode,
+            flatOutputDirectory = ResolveDxfOutputDirectory(flatDxfOutputDirectory),
+            spatialOutputDirectory = ResolveDxfOutputDirectory(spatialDxfOutputDirectory),
+            coplanarityTolerance = dxfCoplanarityTolerance,
+            spatialOptions = new SpatialDxfImportOptions
+            {
+                rhinoZUpToUnityYUp = rhinoZUpToUnityYUp,
+                centerAtOrigin = centerSpatialDxfAtOrigin,
+                // ï¿½Õ¼ï¿½ DXF ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ÛºÃµÄ¿ï¿½ï¿½Õ£ï¿½ï¿½ï¿½×¨ï¿½ï¿½ Kresling ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½
+                // ï¿½ï¿½ï¿½Ã¾Éµï¿½Í³Ò» foldProgress ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½ï¿½ï¿½
+                markImportedCreasesPassive = true
+            }
+        };
+
+        DxfImportResult result = DxfImportRouter.Convert(sourcePath, options);
+
+        if (!result.success)
+        {
+            SetStatus($"DXF ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½: {result.error}", Color.red);
+            LogDxfWarnings(result);
+            return;
+        }
+
+        origamiLoader.LoadModel(result.jsonPath);
+        string warningSuffix = result.warnings.Count > 0 ? $"ï¿½ï¿½{result.warnings.Count} ï¿½ï¿½ï¿½ï¿½ï¿½æ£¬ï¿½ï¿½ï¿½ Consoleï¿½ï¿½" : "";
+        string routeLabel = result.resolvedMode == DxfImportMode.Flat2D ? "ï¿½ï¿½Î¬ DXF" : "ï¿½Õ¼ï¿½ DXF";
+        SetStatus($"{routeLabel} ï¿½Ñ¼ï¿½ï¿½ï¿½: {Path.GetFileName(result.jsonPath)}{warningSuffix}", Color.green);
+        LogDxfWarnings(result);
+    }
+
+    private static void LogDxfWarnings(DxfImportResult result)
+    {
+        for (int i = 0; i < result.warnings.Count; i++)
+            Debug.LogWarning($"[DxfImport] {result.warnings[i]}");
+    }
+
+    private static string ResolveInputPath(string path)
+    {
+        if (Path.IsPathRooted(path))
+            return path;
+
+        bool hasSeparator = path.IndexOfAny(new[] { '/', '\\' }) >= 0;
+        if (!hasSeparator)
+            return Path.Combine(Application.dataPath, "Models", path);
+
+        string normalized = path.Replace('\\', '/');
+        if (normalized.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+            normalized = normalized.Substring("Assets/".Length);
+
+        return Path.Combine(Application.dataPath, normalized);
+    }
+
+    private static string ResolveDxfOutputDirectory(string configuredDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(configuredDirectory))
+            return null;
+
+        if (Path.IsPathRooted(configuredDirectory))
+            return configuredDirectory;
+
+        string normalized = configuredDirectory.Replace('\\', '/');
+        if (normalized.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+            normalized = normalized.Substring("Assets/".Length);
+
+        return Path.Combine(Application.dataPath, normalized);
     }
 
     /// <summary>
-    /// ¸üÐÂ×´Ì¬ÎÄ±¾
+    /// ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½Ä±ï¿½
     /// </summary>
-    /// <param name="message">ÒªÏÔÊ¾µÄÏûÏ¢</param>
-    /// <param name="color">ÏûÏ¢ÑÕÉ«</param>
+    /// <param name="message">Òªï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ï¢</param>
+    /// <param name="color">ï¿½ï¿½Ï¢ï¿½ï¿½É«</param>
     private void SetStatus(string message, Color color)
     {
         if (statusText != null)
@@ -106,9 +238,9 @@ public class SimulationLoader: MonoBehaviour
     }
 
     /// <summary>
-    /// £¨¿ÉÑ¡£©Ìá¹©Ò»¸ö¹«¹²·½·¨£¬ÈÃÆäËû½Å±¾Ò²ÄÜÍ¨¹ý´úÂëµ÷ÓÃÕâ¸ö¼ÓÔØÁ÷³Ì
+    /// ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½á¹©Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å±ï¿½Ò²ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
-    /// <param name="path">Ä£ÐÍÎÄ¼þÂ·¾¶</param>
+    /// <param name="path">Ä£ï¿½ï¿½ï¿½Ä¼ï¿½Â·ï¿½ï¿½</param>
     public void LoadModelFromPath(string path)
     {
         if (pathInputField != null)
