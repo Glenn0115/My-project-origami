@@ -8,6 +8,7 @@ public class SliderController : MonoBehaviour
     public Slider slider;
     public OrigamiController origami;
     public FourServoSequenceController servoSequence;
+    private OrigamiLoader origamiLoader;
 
     private void Awake()
     {
@@ -16,6 +17,8 @@ public class SliderController : MonoBehaviour
 
         if (servoSequence == null)
             servoSequence = FindObjectOfType<FourServoSequenceController>();
+
+        origamiLoader = FindObjectOfType<OrigamiLoader>();
 
         slider.minValue = 0f;
         slider.maxValue = SliderAngleMax;
@@ -35,13 +38,21 @@ public class SliderController : MonoBehaviour
         if (origami == null)
             return;
 
-        // Manual slider input takes ownership back from Auto / Reset.
-        // Otherwise the sequence keeps OrigamiController paused and the
-        // slider value changes without applying any hinge targets.
         if (servoSequence != null && servoSequence.IsRunning)
             servoSequence.StopServoSequence();
 
-        origami.SetFoldProgress(Mathf.InverseLerp(slider.minValue, slider.maxValue, value));
+        float progress = Mathf.InverseLerp(slider.minValue, slider.maxValue, value);
+
+        if (origamiLoader == null)
+            origamiLoader = FindObjectOfType<OrigamiLoader>();
+
+        if (origamiLoader != null && origamiLoader.IsElasticFlattenActive)
+        {
+            origamiLoader.SetElasticFlattenProgress(progress);
+            return;
+        }
+
+        origami.SetFoldProgress(progress);
     }
 
     public void UpdateSliderValue()
@@ -49,7 +60,14 @@ public class SliderController : MonoBehaviour
         if (slider == null || origami == null)
             return;
 
+        if (origamiLoader == null)
+            origamiLoader = FindObjectOfType<OrigamiLoader>();
+
+        float progress = origamiLoader != null && origamiLoader.IsElasticFlattenActive
+            ? origamiLoader.ElasticFlattenProgress
+            : origami.foldProgress;
+
         slider.SetValueWithoutNotify(
-            Mathf.Lerp(slider.minValue, slider.maxValue, Mathf.Clamp01(origami.foldProgress)));
+            Mathf.Lerp(slider.minValue, slider.maxValue, Mathf.Clamp01(progress)));
     }
 }
