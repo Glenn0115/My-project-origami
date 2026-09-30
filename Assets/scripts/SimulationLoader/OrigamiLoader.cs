@@ -39,6 +39,10 @@ public class OrigamiLoader : MonoBehaviour
     [Range(0.01f, 89f)]
     public float panelHalfAngleOverrideDegrees = 5f;
 
+    [Header("Wedge Panel Appearance")]
+    [Tooltip("Optional material for wedge panels. When unset, use a lit material to reveal their facets.")]
+    public Material wedgePanelMaterial;
+
     [Header("Elastic Flatten (soft-paper visualization)")]
     [Tooltip("For a closed paper model that can flatten only by bending/stretching. This is a kinematic visual mode, not a rigid-origami physics simulation.")]
     public bool enableElasticFlatten = false;
@@ -69,6 +73,7 @@ public class OrigamiLoader : MonoBehaviour
     public float legacySpatialDxfSliderTravelAngle = 180f;
 
     private OrigamiModel model;
+    private string loadedJsonFullPath;
     private List<Vector3> vertices = new();
     private Dictionary<int, GameObject> faceObjects = new();
     private List<HingeJoint> hinges = new();
@@ -129,7 +134,14 @@ public class OrigamiLoader : MonoBehaviour
             return;
         }
 
+        loadedJsonFullPath = jsonFullPath;
         elasticFlattenActive = ShouldUseElasticFlatten();
+
+        if (model.panelHalfAngleDegrees > 0f)
+        {
+            float halfAngle = overridePanelHalfAngle ? panelHalfAngleOverrideDegrees : model.panelHalfAngleDegrees;
+            Debug.Log($"[OrigamiLoader] Wedge model: {loadedJsonFullPath}, half-angle: {halfAngle:F1}°, Inspector override: {overridePanelHalfAngle}");
+        }
 
         if (!elasticFlattenActive && PrepareSpatialDxfSliderDrive(jsonFullPath))
             ResetFoldStateAndSlider();
@@ -375,11 +387,20 @@ public class OrigamiLoader : MonoBehaviour
 
             var renderer = obj.AddComponent<MeshRenderer>();
 
-            // ✅ 仅使用 Inspector 中的 defaultMaterial
-            // 移除所有 JSON 和自定义颜色逻辑
-            Material faceMat = defaultMaterial != null
-                ? new Material(defaultMaterial)  // 复制 Inspector 中的材质
-                : new Material(Shader.Find("Standard"));
+            Material faceMat;
+            if (useWedgePanels && wedgePanelMaterial == null)
+            {
+                faceMat = new Material(Shader.Find("Standard"));
+                if (defaultMaterial != null && defaultMaterial.HasProperty("_FrontColor"))
+                    faceMat.color = defaultMaterial.GetColor("_FrontColor");
+            }
+            else
+            {
+                Material sourceMaterial = useWedgePanels ? wedgePanelMaterial : defaultMaterial;
+                faceMat = sourceMaterial != null
+                    ? new Material(sourceMaterial)
+                    : new Material(Shader.Find("Standard"));
+            }
 
             // At the planar endpoint some faces reverse their winding. Use
             // the material's cull setting when available so the soft-paper
@@ -1135,7 +1156,7 @@ public class OrigamiLoader : MonoBehaviour
     }
 
     // 公共方法
-    public void ReloadModel() => LoadModel();
+    public void ReloadModel() => LoadModel(loadedJsonFullPath ?? jsonPath);
     public void LoadModelByName(string modelName)
     {
         string name = modelName.EndsWith(".json") ? modelName : modelName + ".json";
