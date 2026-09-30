@@ -93,6 +93,12 @@ public class OrigamiModel
     public int spatialDxfImportVersion = 0;
     public bool spatialDxfSliderDriveEnabled = false;
     public float spatialDxfSliderTravelAngle = 0f;
+    public float panelHalfAngleDegrees = 0f;
+
+    // Explicit opt-in for the soft-paper visual mode. It is deliberately
+    // separate from spatialDxfSliderDriveEnabled, which controls rigid
+    // HingeJoint driving.
+    public bool elasticFlattenEnabled = false;
 
     public OrigamiMaterial material = new OrigamiMaterial();
     

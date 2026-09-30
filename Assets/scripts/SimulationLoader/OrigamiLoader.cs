@@ -6,6 +6,13 @@ using UnityEngine.UI;
 
 public class OrigamiLoader : MonoBehaviour
 {
+    public enum ElasticFlattenPlane
+    {
+        XY,
+        XZ,
+        YZ
+    }
+
     [Header("模型文件")]
     public string jsonPath = "D:\\0work\\Develop\\unity\\Origami_Simulator\\Assets\\scripts\\CustomPattern_minAngle0.json";    //所需文件路径和文件名
     
@@ -21,6 +28,23 @@ public class OrigamiLoader : MonoBehaviour
     [Header("Physics Colliders")]
     [Min(0.001f)]
     public float colliderThickness = 0.01f;
+
+    [Tooltip("Ignore collisions between runtime-generated origami faces. Keep this on for ideal zero-thickness folding, such as a Kresling model folding flat.")]
+    public bool ignoreInternalFaceCollisions = false;
+
+    [Header("Wedge Panel Angle")]
+    [Tooltip("Override the JSON half-angle for wedge panels. Reload the model after changing this value.")]
+    public bool overridePanelHalfAngle = false;
+
+    [Range(0.01f, 89f)]
+    public float panelHalfAngleOverrideDegrees = 5f;
+
+    [Header("Elastic Flatten (soft-paper visualization)")]
+    [Tooltip("For a closed paper model that can flatten only by bending/stretching. This is a kinematic visual mode, not a rigid-origami physics simulation.")]
+    public bool enableElasticFlatten = false;
+
+    [Tooltip("Plane used by the elastic flatten target. 927 uses XY because its compression axis is Z.")]
+    public ElasticFlattenPlane elasticFlattenPlane = ElasticFlattenPlane.XY;
 
     [Header("Physics Stability")]
     public float driverSpring = 60f;
@@ -50,6 +74,13 @@ public class OrigamiLoader : MonoBehaviour
     private List<HingeJoint> hinges = new();
     private GameObject creaseParent;
     private List<GameObject> faceListObjects = new();
+    private readonly List<Vector3> elasticFlattenSourceVertices = new();
+    private readonly List<Vector3> elasticFlattenTargetVertices = new();
+    [SerializeField, Range(0f, 1f)] private float elasticFlattenProgress;
+    private bool elasticFlattenActive;
+
+    public bool IsElasticFlattenActive => elasticFlattenActive;
+    public float ElasticFlattenProgress => elasticFlattenProgress;
 
     // ✅ 三种预生成材质（减少内存消耗）
     private Material mountainMat;
@@ -98,7 +129,9 @@ public class OrigamiLoader : MonoBehaviour
             return;
         }
 
-        if (PrepareSpatialDxfSliderDrive(jsonFullPath))
+        elasticFlattenActive = ShouldUseElasticFlatten();
+
+        if (!elasticFlattenActive && PrepareSpatialDxfSliderDrive(jsonFullPath))
             ResetFoldStateAndSlider();
 
         UpdateUIInfo();
@@ -114,13 +147,33 @@ public class OrigamiLoader : MonoBehaviour
         }
 
         if (model.faces != null && model.faces.Count > 0)
+        {
             CreateFaces();
+            if (!elasticFlattenActive && ignoreInternalFaceCollisions)
+                IgnoreInternalFaceCollisions();
+        }
 
         if (showCreases && model.creases != null && model.creases.Count > 0)
             DrawCreases();
 
 
-        CreateCreasesAndConnections();
+        if (elasticFlattenActive)
+        {
+            InitializeElasticFlatten();
+            ResetFoldStateAndSlider();
+        }
+        else
+        {
+            CreateCreasesAndConnections();
+        }
+    }
+
+    private bool ShouldUseElasticFlatten()
+    {
+        if (!enableElasticFlatten || model == null || model.faces == null || model.faces.Count == 0)
+            return false;
+
+        return model.elasticFlattenEnabled;
     }
 
     // SimulationLoader uses this to give legacy *_spatial.json files the same
@@ -217,6 +270,11 @@ public class OrigamiLoader : MonoBehaviour
     {
         Debug.Log("[OrigamiLoader] 清理当前模型");
 
+        elasticFlattenActive = false;
+        elasticFlattenProgress = 0f;
+        elasticFlattenSourceVertices.Clear();
+        elasticFlattenTargetVertices.Clear();
+
         var controller = GetComponent<OrigamiController>();
         if (controller != null)
             controller.ClearAllHinges();
@@ -258,11 +316,19 @@ public class OrigamiLoader : MonoBehaviour
 
     private void CreateFaces()
     {
+        bool useWedgePanels = model.panelHalfAngleDegrees > 0f;
+        float halfAngleDegrees = overridePanelHalfAngle ? panelHalfAngleOverrideDegrees : model.panelHalfAngleDegrees;
         foreach (var face in model.faces)
         {
             if (face.vertices == null || face.vertices.Count < 3)
             {
                 Debug.LogWarning($"[OrigamiLoader] Skip Face_{face.id}: fewer than 3 vertices");
+                continue;
+            }
+
+            if (useWedgePanels && face.vertices.Count != 3)
+            {
+                Debug.LogError($"[OrigamiLoader] Skip Face_{face.id}: wedge panels require exactly 3 vertices");
                 continue;
             }
 
@@ -275,17 +341,32 @@ public class OrigamiLoader : MonoBehaviour
             for (int i = 0; i < face.vertices.Count; i++)
                 fVerts[i] = vertices[face.vertices[i] - 1];
 
-            int[] tris = BuildFaceTriangles(fVerts);
-            if (tris.Length < 3)
+            if (useWedgePanels)
             {
-                Debug.LogWarning($"[OrigamiLoader] Skip Face_{face.id}: triangulation failed");
-                Destroy(obj);
-                continue;
+                if (!TryBuildWedgePanelMesh(mesh, fVerts[0], fVerts[1], fVerts[2], halfAngleDegrees))
+                {
+                    Debug.LogError($"[OrigamiLoader] Skip Face_{face.id}: invalid wedge angle or degenerate triangle");
+                    Destroy(mesh);
+                    Destroy(obj);
+                    continue;
+                }
+            }
+            else
+            {
+                int[] tris = BuildFaceTriangles(fVerts);
+                if (tris.Length < 3)
+                {
+                    Debug.LogWarning($"[OrigamiLoader] Skip Face_{face.id}: triangulation failed");
+                    Destroy(mesh);
+                    Destroy(obj);
+                    continue;
+                }
+
+                mesh.vertices = fVerts;
+                mesh.triangles = tris;
             }
 
             mesh.name = $"Face_{face.id}_Mesh";
-            mesh.vertices = fVerts;
-            mesh.triangles = tris;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
 
@@ -300,22 +381,270 @@ public class OrigamiLoader : MonoBehaviour
                 ? new Material(defaultMaterial)  // 复制 Inspector 中的材质
                 : new Material(Shader.Find("Standard"));
 
+            // At the planar endpoint some faces reverse their winding. Use
+            // the material's cull setting when available so the soft-paper
+            // visualization remains visible from either side.
+            if (elasticFlattenActive && faceMat.HasProperty("_Cull"))
+                faceMat.SetInt("_Cull", 0);
+
             renderer.material = faceMat;  // 直接使用材质
 
-            CreateFaceColliderChildren(obj, mesh, face.id);
+            // Elastic flatten is a soft-paper visualization. Do not create
+            // colliders or rigidbodies that would fight the scripted mesh
+            // deformation.
+            if (!elasticFlattenActive)
+            {
+                if (useWedgePanels)
+                {
+                    MeshCollider collider = obj.AddComponent<MeshCollider>();
+                    collider.sharedMesh = mesh;
+                    collider.convex = true;
+                }
+                else
+                {
+                    CreateFaceColliderChildren(obj, mesh, face.id);
+                }
 
-            Rigidbody rb = obj.AddComponent<Rigidbody>();
-            rb.useGravity = false;
-            rb.mass = face.rigid ? 0.2f : 0.1f;
-            rb.drag = face.rigid ? 0.8f : 0.5f;
-            rb.angularDrag = face.rigid ? 0.8f : 0.5f;
-            rb.solverIterations = Mathf.Max(1, solverIterations);
-            rb.solverVelocityIterations = Mathf.Max(1, solverVelocityIterations);
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
+                Rigidbody rb = obj.AddComponent<Rigidbody>();
+                rb.useGravity = false;
+                rb.mass = face.rigid ? 0.2f : 0.1f;
+                rb.drag = face.rigid ? 0.8f : 0.5f;
+                rb.angularDrag = face.rigid ? 0.8f : 0.5f;
+                rb.solverIterations = Mathf.Max(1, solverIterations);
+                rb.solverVelocityIterations = Mathf.Max(1, solverVelocityIterations);
+                rb.interpolation = RigidbodyInterpolation.Interpolate;
+            }
 
             faceObjects[face.id] = obj;
             faceListObjects.Add(obj);
         }
+    }
+
+    private static bool TryBuildWedgePanelMesh(Mesh mesh, Vector3 first, Vector3 second, Vector3 third, float halfAngleDegrees)
+    {
+        if (halfAngleDegrees <= 0f || halfAngleDegrees >= 90f)
+            return false;
+
+        float oppositeFirst = Vector3.Distance(second, third);
+        float oppositeSecond = Vector3.Distance(third, first);
+        float oppositeThird = Vector3.Distance(first, second);
+        float perimeter = oppositeFirst + oppositeSecond + oppositeThird;
+        Vector3 cross = Vector3.Cross(second - first, third - first);
+        float doubleArea = cross.magnitude;
+        if (perimeter < 0.000001f || doubleArea < 0.000001f)
+            return false;
+
+        Vector3 incenter = (first * oppositeFirst + second * oppositeSecond + third * oppositeThird) / perimeter;
+        float halfHeight = doubleArea / perimeter * Mathf.Tan(halfAngleDegrees * Mathf.Deg2Rad);
+        Vector3 offset = cross / doubleArea * halfHeight;
+        Vector3 top = incenter + offset;
+        Vector3 bottom = incenter - offset;
+
+        mesh.vertices = new[]
+        {
+            first, second, top,
+            second, third, top,
+            third, first, top,
+            second, first, bottom,
+            third, second, bottom,
+            first, third, bottom
+        };
+        mesh.triangles = new[]
+        {
+            0, 1, 2, 3, 4, 5, 6, 7, 8,
+            9, 10, 11, 12, 13, 14, 15, 16, 17
+        };
+        return true;
+    }
+
+    private void InitializeElasticFlatten()
+    {
+        elasticFlattenSourceVertices.Clear();
+        elasticFlattenTargetVertices.Clear();
+        elasticFlattenSourceVertices.AddRange(vertices);
+
+        float planeCoordinate = GetElasticFlattenPlaneCoordinate(vertices);
+        for (int i = 0; i < elasticFlattenSourceVertices.Count; i++)
+        {
+            Vector3 target = elasticFlattenSourceVertices[i];
+            switch (elasticFlattenPlane)
+            {
+                case ElasticFlattenPlane.XY:
+                    target.z = planeCoordinate;
+                    break;
+                case ElasticFlattenPlane.XZ:
+                    target.y = planeCoordinate;
+                    break;
+                case ElasticFlattenPlane.YZ:
+                    target.x = planeCoordinate;
+                    break;
+            }
+            elasticFlattenTargetVertices.Add(target);
+        }
+
+        elasticFlattenProgress = 0f;
+        SetElasticFlattenProgress(0f);
+        Debug.Log($"[OrigamiLoader] Elastic Flatten enabled for {model.name}. This is a soft-paper visual deformation, not rigid-fold physics.");
+    }
+
+    private float GetElasticFlattenPlaneCoordinate(List<Vector3> sourceVertices)
+    {
+        if (sourceVertices == null || sourceVertices.Count == 0)
+            return 0f;
+
+        float total = 0f;
+        for (int i = 0; i < sourceVertices.Count; i++)
+        {
+            switch (elasticFlattenPlane)
+            {
+                case ElasticFlattenPlane.XY:
+                    total += sourceVertices[i].z;
+                    break;
+                case ElasticFlattenPlane.XZ:
+                    total += sourceVertices[i].y;
+                    break;
+                case ElasticFlattenPlane.YZ:
+                    total += sourceVertices[i].x;
+                    break;
+            }
+        }
+        return total / sourceVertices.Count;
+    }
+
+    public void SetElasticFlattenProgress(float progress)
+    {
+        if (!elasticFlattenActive || model == null
+            || elasticFlattenSourceVertices.Count != vertices.Count
+            || elasticFlattenTargetVertices.Count != vertices.Count)
+            return;
+
+        elasticFlattenProgress = Mathf.Clamp01(progress);
+        for (int faceIndex = 0; faceIndex < model.faces.Count; faceIndex++)
+        {
+            OrigamiFace face = model.faces[faceIndex];
+            if (face == null || face.vertices == null
+                || !faceObjects.TryGetValue(face.id, out GameObject faceObject)
+                || faceObject == null)
+                continue;
+
+            MeshFilter meshFilter = faceObject.GetComponent<MeshFilter>();
+            if (meshFilter == null || meshFilter.mesh == null)
+                continue;
+
+            Mesh mesh = meshFilter.mesh;
+            Vector3[] meshVertices = mesh.vertices;
+            if (meshVertices.Length != face.vertices.Count)
+                continue;
+
+            for (int vertexIndex = 0; vertexIndex < face.vertices.Count; vertexIndex++)
+            {
+                int modelVertexIndex = face.vertices[vertexIndex] - 1;
+                if (modelVertexIndex < 0 || modelVertexIndex >= elasticFlattenSourceVertices.Count)
+                    continue;
+
+                meshVertices[vertexIndex] = Vector3.Lerp(
+                    elasticFlattenSourceVertices[modelVertexIndex],
+                    elasticFlattenTargetVertices[modelVertexIndex],
+                    elasticFlattenProgress);
+            }
+
+            mesh.vertices = meshVertices;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+        }
+
+        UpdateElasticCreaseLines();
+    }
+
+    private Vector3 GetDisplayedVertex(int vertexIndex)
+    {
+        if (vertexIndex < 0 || vertexIndex >= vertices.Count)
+            return Vector3.zero;
+
+        if (!elasticFlattenActive
+            || vertexIndex >= elasticFlattenSourceVertices.Count
+            || vertexIndex >= elasticFlattenTargetVertices.Count)
+            return vertices[vertexIndex];
+
+        return Vector3.Lerp(
+            elasticFlattenSourceVertices[vertexIndex],
+            elasticFlattenTargetVertices[vertexIndex],
+            elasticFlattenProgress);
+    }
+
+    private void UpdateElasticCreaseLines()
+    {
+        if (!elasticFlattenActive || model == null || model.creases == null)
+            return;
+
+        int count = Mathf.Min(model.creases.Count, creaseLineObjects.Count);
+        for (int creaseIndex = 0; creaseIndex < count; creaseIndex++)
+        {
+            GameObject creaseLineObject = creaseLineObjects[creaseIndex];
+            if (creaseLineObject == null)
+                continue;
+
+            LineRenderer lineRenderer = creaseLineObject.GetComponent<LineRenderer>();
+            OrigamiCrease crease = model.creases[creaseIndex];
+            if (lineRenderer == null || crease == null)
+                continue;
+
+            Vector3 firstPoint = GetDisplayedVertex(crease.v1 - 1);
+            Vector3 secondPoint = GetDisplayedVertex(crease.v2 - 1);
+            lineRenderer.useWorldSpace = true;
+            lineRenderer.SetPosition(0, transform.TransformPoint(firstPoint));
+            lineRenderer.SetPosition(1, transform.TransformPoint(secondPoint));
+        }
+    }
+
+    // HingeJoint.enableCollision only suppresses collision for the two faces
+    // joined by that hinge. A flat-folding origami model also needs distant
+    // faces to pass through / stack on each other, so disable contacts between
+    // every pair of generated face objects when the optional ideal-sheet mode
+    // is enabled.
+    private void IgnoreInternalFaceCollisions()
+    {
+        int ignoredPairCount = 0;
+        for (int firstFaceIndex = 0; firstFaceIndex < faceListObjects.Count; firstFaceIndex++)
+        {
+            GameObject firstFace = faceListObjects[firstFaceIndex];
+            if (firstFace == null)
+                continue;
+
+            Collider[] firstColliders = firstFace.GetComponentsInChildren<Collider>(true);
+            if (firstColliders == null || firstColliders.Length == 0)
+                continue;
+
+            for (int secondFaceIndex = firstFaceIndex + 1; secondFaceIndex < faceListObjects.Count; secondFaceIndex++)
+            {
+                GameObject secondFace = faceListObjects[secondFaceIndex];
+                if (secondFace == null)
+                    continue;
+
+                Collider[] secondColliders = secondFace.GetComponentsInChildren<Collider>(true);
+                if (secondColliders == null || secondColliders.Length == 0)
+                    continue;
+
+                for (int firstColliderIndex = 0; firstColliderIndex < firstColliders.Length; firstColliderIndex++)
+                {
+                    Collider firstCollider = firstColliders[firstColliderIndex];
+                    if (firstCollider == null)
+                        continue;
+
+                    for (int secondColliderIndex = 0; secondColliderIndex < secondColliders.Length; secondColliderIndex++)
+                    {
+                        Collider secondCollider = secondColliders[secondColliderIndex];
+                        if (secondCollider == null)
+                            continue;
+
+                        Physics.IgnoreCollision(firstCollider, secondCollider, true);
+                        ignoredPairCount++;
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"[OrigamiLoader] Ignored {ignoredPairCount} internal face-collider pair(s).");
     }
 
     private int[] BuildFaceTriangles(Vector3[] faceVertices)
@@ -737,8 +1066,8 @@ public class OrigamiLoader : MonoBehaviour
 
         foreach (var crease in model.creases)
         {
-            Vector3 p1 = vertices[crease.v1 - 1];
-            Vector3 p2 = vertices[crease.v2 - 1];
+            Vector3 p1 = GetDisplayedVertex(crease.v1 - 1);
+            Vector3 p2 = GetDisplayedVertex(crease.v2 - 1);
 
             GameObject attachFace = null;
             for (int fIdx = 0; fIdx < model.faces.Count; fIdx++)
@@ -757,11 +1086,13 @@ public class OrigamiLoader : MonoBehaviour
             var lr = lineObj.AddComponent<LineRenderer>();
             lr.positionCount = 2;
             lr.startWidth = lr.endWidth = crease.width > 0 ? crease.width : model.defaultCreaseWidth;
-            lr.useWorldSpace = attachFace == null;
+            lr.useWorldSpace = elasticFlattenActive || attachFace == null;
             if (lr.useWorldSpace)
             {
-                lr.SetPosition(0, p1);
-                lr.SetPosition(1, p2);
+                Vector3 worldP1 = elasticFlattenActive ? transform.TransformPoint(p1) : p1;
+                Vector3 worldP2 = elasticFlattenActive ? transform.TransformPoint(p2) : p2;
+                lr.SetPosition(0, worldP1);
+                lr.SetPosition(1, worldP2);
             }
             else
             {
