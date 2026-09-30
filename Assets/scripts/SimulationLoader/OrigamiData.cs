@@ -94,6 +94,7 @@ public class OrigamiModel
     public bool spatialDxfSliderDriveEnabled = false;
     public float spatialDxfSliderTravelAngle = 0f;
     public bool autoTorqueFoldToMechanicalStop = false;
+    public List<int> torqueAutoFoldCreaseIds = new List<int>();
     public bool enableInternalFaceCollisions = false;
     public float panelHalfAngleDegrees = 0f;
 

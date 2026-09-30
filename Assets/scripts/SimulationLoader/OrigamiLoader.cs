@@ -176,10 +176,12 @@ public class OrigamiLoader : MonoBehaviour
         }
         else
         {
+            OrigamiController controller = GetComponent<OrigamiController>();
+            if (controller != null)
+                controller.ConfigureTorqueAutoFoldCreases(model.torqueAutoFoldCreaseIds);
             CreateCreasesAndConnections();
             if (model.autoTorqueFoldToMechanicalStop)
             {
-                OrigamiController controller = GetComponent<OrigamiController>();
                 if (controller != null && controller.GetValidHingeCount() > 0)
                 {
                     controller.StartTorqueAutoFoldToMax();

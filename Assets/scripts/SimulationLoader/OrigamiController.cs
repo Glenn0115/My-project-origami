@@ -46,6 +46,7 @@ public class OrigamiController : MonoBehaviour
     private bool torqueAutoFoldPassive;
     private float torqueAutoFoldElapsed;
     private float torqueAutoFoldStableTime;
+    private readonly HashSet<int> torqueAutoFoldCreaseIds = new HashSet<int>();
 
     private OrigamiPhysicsMonitor physicsMonitor;
 
@@ -392,6 +393,24 @@ public class OrigamiController : MonoBehaviour
         return count > 0 ? total / count : requestedFoldProgress;
     }
 
+    public void ConfigureTorqueAutoFoldCreases(List<int> creaseIds)
+    {
+        torqueAutoFoldCreaseIds.Clear();
+        if (creaseIds == null)
+            return;
+
+        foreach (int creaseId in creaseIds)
+            torqueAutoFoldCreaseIds.Add(creaseId);
+    }
+
+    private bool IsTorqueAutoFoldDriver(OrigamiHingeInfo info)
+    {
+        return info != null && info.springDriveEnabled
+            && (torqueAutoFoldCreaseIds.Count > 0
+                ? torqueAutoFoldCreaseIds.Contains(info.creaseId)
+                : info.isDriver);
+    }
+
     [ContextMenu("Start torque folding until stalled")]
     public void StartTorqueAutoFoldToMax()
     {
@@ -412,7 +431,8 @@ public class OrigamiController : MonoBehaviour
                 SetHingePassive(info.hinge);
         }
 
-        Debug.Log("[OrigamiController] Torque folding started; springs, motors, and angular limits are off.");
+        int driverCount = hingeInfos.Count(info => info != null && IsJointValid(info.hinge) && IsTorqueAutoFoldDriver(info));
+        Debug.Log($"[OrigamiController] Torque folding started with {driverCount} driver hinges; springs, motors, and angular limits are off.");
     }
 
     [ContextMenu("Stop torque folding (leave hinges passive)")]
@@ -491,7 +511,7 @@ public class OrigamiController : MonoBehaviour
         {
             OrigamiHingeInfo info = hingeInfos[i];
             HingeJoint hinge = info != null ? info.hinge : null;
-            if (info == null || !info.springDriveEnabled || !info.isDriver || !IsJointValid(hinge))
+            if (!IsJointValid(hinge) || !IsTorqueAutoFoldDriver(info))
                 continue;
 
             Rigidbody ownerBody = hinge.GetComponent<Rigidbody>();
@@ -543,6 +563,7 @@ public class OrigamiController : MonoBehaviour
         torqueAutoFoldPassive = false;
         torqueAutoFoldElapsed = 0f;
         torqueAutoFoldStableTime = 0f;
+        torqueAutoFoldCreaseIds.Clear();
         hinges.Clear();
         hingeInfos.Clear();
         if (physicsMonitor != null)
