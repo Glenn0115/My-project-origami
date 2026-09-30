@@ -93,6 +93,8 @@ public class OrigamiModel
     public int spatialDxfImportVersion = 0;
     public bool spatialDxfSliderDriveEnabled = false;
     public float spatialDxfSliderTravelAngle = 0f;
+    public bool autoTorqueFoldToMechanicalStop = false;
+    public bool enableInternalFaceCollisions = false;
     public float panelHalfAngleDegrees = 0f;
 
     // Explicit opt-in for the soft-paper visual mode. It is deliberately

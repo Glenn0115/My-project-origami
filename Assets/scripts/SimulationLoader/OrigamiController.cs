@@ -29,11 +29,12 @@ public class OrigamiController : MonoBehaviour
     public float torqueAutoFoldDirection = 1f;
     public float torqueAutoFoldDamping = 0.04f;
     public float torqueAutoFoldMaxTorque = 8f;
+    [Tooltip("Angular velocity below which torque folding is considered stalled, in degrees per second.")]
     public float torqueAutoFoldVelocityTolerance = 0.5f;
-    public float torqueAutoFoldAngleChangeTolerance = 0.05f;
     public float torqueAutoFoldStallSeconds = 0.5f;
     public float torqueAutoFoldMinRunTime = 0.25f;
-    public bool disableSpringDuringTorqueAutoFold = true;
+    [Min(0.1f)]
+    public float torqueAutoFoldMaxDuration = 10f;
 
     private float requestedFoldProgress;
     private float appliedFoldProgress;
@@ -42,10 +43,9 @@ public class OrigamiController : MonoBehaviour
     private bool dangerPauseApplied;
 
     private bool torqueAutoFoldActive;
+    private bool torqueAutoFoldPassive;
     private float torqueAutoFoldElapsed;
-    private readonly Dictionary<HingeJoint, float> torqueAutoFoldLastAngles = new Dictionary<HingeJoint, float>();
-    private readonly Dictionary<HingeJoint, float> torqueAutoFoldStableTimes = new Dictionary<HingeJoint, float>();
-    private readonly HashSet<HingeJoint> torqueAutoFoldStoppedHinges = new HashSet<HingeJoint>();
+    private float torqueAutoFoldStableTime;
 
     private OrigamiPhysicsMonitor physicsMonitor;
 
@@ -87,6 +87,12 @@ public class OrigamiController : MonoBehaviour
         Debug.Log("[OrigamiController] Found " + initialJoints.Count + " valid hinge joints.");
     }
 
+    private void OnDisable()
+    {
+        if (torqueAutoFoldActive)
+            StopTorqueAutoFoldToMax();
+    }
+
     public void AddHinge(HingeJoint hinge)
     {
         if (!IsJointValid(hinge))
@@ -108,12 +114,8 @@ public class OrigamiController : MonoBehaviour
         hinges.Add(hinge);
         hingeInfos.Add(info);
 
-        if (torqueAutoFoldActive)
-        {
-            ConfigureHingeForTorqueAutoFold(hinge, info);
-            if (info.isDriver)
-                TrackTorqueAutoFoldHinge(hinge);
-        }
+        if (torqueAutoFoldActive || torqueAutoFoldPassive)
+            SetHingePassive(hinge);
 
         if (physicsMonitor != null)
             physicsMonitor.RegisterHinges(hingeInfos);
@@ -141,7 +143,7 @@ public class OrigamiController : MonoBehaviour
         if (hinges.Count == 0)
             return;
 
-        if (!torqueAutoFoldActive)
+        if (!torqueAutoFoldActive && !torqueAutoFoldPassive)
         {
             HandleFoldInput();
             SyncFoldProgressWithSlider();
@@ -158,6 +160,17 @@ public class OrigamiController : MonoBehaviour
 
         if (PhysicsState == OrigamiPhysicsHealthState.Danger && pauseOnDanger)
         {
+            if (torqueAutoFoldActive)
+            {
+                StopTorqueAutoFoldToMax();
+                dangerPauseApplied = true;
+                Debug.LogWarning("[OrigamiController] Torque folding stopped by hinge gap; all hinges are passive.");
+                return;
+            }
+
+            if (torqueAutoFoldPassive)
+                return;
+
             if (!dangerPauseApplied)
             {
                 FreezeSpringTargetsAtCurrentAngles();
@@ -168,13 +181,14 @@ public class OrigamiController : MonoBehaviour
                 Debug.LogWarning("[OrigamiController] Physics danger detected. Hinge drive force was released; the last stable target is restored.");
             }
 
-            if (torqueAutoFoldActive)
-                StopTorqueAutoFoldToMax();
             return;
         }
 
         if (PhysicsState != OrigamiPhysicsHealthState.Danger)
             dangerPauseApplied = false;
+
+        if (torqueAutoFoldPassive)
+            return;
 
         if (torqueAutoFoldActive)
         {
@@ -242,6 +256,9 @@ public class OrigamiController : MonoBehaviour
     // Keeps the public API used by SliderController. The actual targets move in FixedUpdate.
     public void SetFoldProgress(float progress)
     {
+        if (torqueAutoFoldActive || torqueAutoFoldPassive)
+            return;
+
         requestedFoldProgress = Mathf.Clamp01(progress);
         foldProgress = requestedFoldProgress;
         lastFoldProgress = foldProgress;
@@ -252,8 +269,7 @@ public class OrigamiController : MonoBehaviour
     // restores the old model's target instead of the new model's zero pose.
     public void ResetFoldState(float progress = 0f)
     {
-        if (torqueAutoFoldActive)
-            StopTorqueAutoFoldToMax();
+        ResumeSpringFoldDrive();
 
         float resetProgress = Mathf.Clamp01(progress);
         requestedFoldProgress = resetProgress;
@@ -376,6 +392,7 @@ public class OrigamiController : MonoBehaviour
         return count > 0 ? total / count : requestedFoldProgress;
     }
 
+    [ContextMenu("Start torque folding until stalled")]
     public void StartTorqueAutoFoldToMax()
     {
         FilterInvalidJoints();
@@ -383,49 +400,89 @@ public class OrigamiController : MonoBehaviour
         foldProgress = 1f;
         lastFoldProgress = 1f;
         torqueAutoFoldActive = true;
+        torqueAutoFoldPassive = false;
         torqueAutoFoldElapsed = 0f;
-        ClearTorqueAutoFoldState();
+        torqueAutoFoldStableTime = 0f;
+        dangerPauseApplied = false;
 
         for (int i = 0; i < hingeInfos.Count; i++)
         {
             OrigamiHingeInfo info = hingeInfos[i];
-            if (info == null || !info.springDriveEnabled || !IsJointValid(info.hinge))
-                continue;
-            ConfigureHingeForTorqueAutoFold(info.hinge, info);
-            if (info.isDriver)
-                TrackTorqueAutoFoldHinge(info.hinge);
+            if (info != null && IsJointValid(info.hinge))
+                SetHingePassive(info.hinge);
+        }
+
+        Debug.Log("[OrigamiController] Torque folding started; springs, motors, and angular limits are off.");
+    }
+
+    [ContextMenu("Stop torque folding (leave hinges passive)")]
+    public void StopTorqueAutoFoldToMax()
+    {
+        if (!torqueAutoFoldActive)
+            return;
+
+        torqueAutoFoldActive = false;
+        torqueAutoFoldPassive = true;
+        torqueAutoFoldElapsed = 0f;
+        torqueAutoFoldStableTime = 0f;
+
+        for (int i = 0; i < hingeInfos.Count; i++)
+        {
+            OrigamiHingeInfo info = hingeInfos[i];
+            if (info != null && IsJointValid(info.hinge))
+                SetHingePassive(info.hinge);
         }
     }
 
-    public void StopTorqueAutoFoldToMax()
+    [ContextMenu("Resume slider spring drive")]
+    public void ResumeSpringFoldDrive()
     {
+        if (!torqueAutoFoldActive && !torqueAutoFoldPassive)
+            return;
+
         torqueAutoFoldActive = false;
+        torqueAutoFoldPassive = false;
         torqueAutoFoldElapsed = 0f;
-        ClearTorqueAutoFoldState();
+        torqueAutoFoldStableTime = 0f;
 
         for (int i = 0; i < hingeInfos.Count; i++)
         {
             OrigamiHingeInfo info = hingeInfos[i];
             if (info == null || !IsJointValid(info.hinge))
                 continue;
+            JointSpring spring = info.hinge.spring;
+            spring.targetPosition = Mathf.Clamp(info.hinge.angle, info.hinge.limits.min, info.hinge.limits.max);
+            info.hinge.spring = spring;
+            info.hinge.useMotor = false;
             info.hinge.useLimits = true;
             info.hinge.useSpring = info.springDriveEnabled;
         }
+
+        requestedFoldProgress = CalculateAppliedFoldProgress();
+        foldProgress = requestedFoldProgress;
+        lastFoldProgress = requestedFoldProgress;
+        lastStableFoldProgress = requestedFoldProgress;
     }
 
-    private void ConfigureHingeForTorqueAutoFold(HingeJoint hinge, OrigamiHingeInfo info)
+    private static void SetHingePassive(HingeJoint hinge)
     {
-        if (!IsJointValid(hinge))
-            return;
-
-        hinge.useLimits = true;
-        hinge.useSpring = info.springDriveEnabled && (!info.isDriver || !disableSpringDuringTorqueAutoFold);
+        hinge.useMotor = false;
+        hinge.useSpring = false;
+        hinge.useLimits = false;
     }
 
     private void ApplyTorqueAutoFoldToMax()
     {
         torqueAutoFoldElapsed += Time.fixedDeltaTime;
-        bool anyActiveDriver = false;
+        if (torqueAutoFoldElapsed >= Mathf.Max(0.1f, torqueAutoFoldMaxDuration))
+        {
+            StopTorqueAutoFoldToMax();
+            Debug.LogWarning("[OrigamiController] Torque folding reached its safety timeout; all hinges are passive.");
+            return;
+        }
+
+        bool anyDriver = false;
+        bool allDriversSettled = true;
         float direction = Mathf.Sign(torqueAutoFoldDirection);
         if (Mathf.Abs(direction) < 0.001f)
             direction = 1f;
@@ -437,16 +494,6 @@ public class OrigamiController : MonoBehaviour
             if (info == null || !info.springDriveEnabled || !info.isDriver || !IsJointValid(hinge))
                 continue;
 
-            if (!torqueAutoFoldLastAngles.ContainsKey(hinge))
-                TrackTorqueAutoFoldHinge(hinge);
-            if (torqueAutoFoldStoppedHinges.Contains(hinge))
-                continue;
-            if (IsTorqueHingeStateUnchanged(hinge))
-            {
-                torqueAutoFoldStoppedHinges.Add(hinge);
-                continue;
-            }
-
             Rigidbody ownerBody = hinge.GetComponent<Rigidbody>();
             if (ownerBody == null)
                 continue;
@@ -454,6 +501,10 @@ public class OrigamiController : MonoBehaviour
             Vector3 worldAxis = hinge.transform.TransformDirection(hinge.axis).normalized;
             if (worldAxis.sqrMagnitude < 0.0001f)
                 continue;
+
+            anyDriver = true;
+            if (Mathf.Abs(hinge.velocity) > Mathf.Max(0f, torqueAutoFoldVelocityTolerance))
+                allDriversSettled = false;
 
             float healthMultiplier = physicsMonitor != null && physicsMonitor.ShouldSlowHinge(info)
                 ? warningSpeedMultiplier
@@ -465,62 +516,33 @@ public class OrigamiController : MonoBehaviour
             ownerBody.AddTorque(torque, ForceMode.Acceleration);
             if (hinge.connectedBody != null && !hinge.connectedBody.isKinematic)
                 hinge.connectedBody.AddTorque(-torque, ForceMode.Acceleration);
-            anyActiveDriver = true;
         }
 
-        if (!anyActiveDriver)
+        if (!anyDriver)
+        {
             StopTorqueAutoFoldToMax();
-    }
-
-    private void TrackTorqueAutoFoldHinge(HingeJoint hinge)
-    {
-        if (!IsJointValid(hinge))
+            Debug.LogWarning("[OrigamiController] Torque folding found no valid driver; all hinges are passive.");
             return;
-        torqueAutoFoldLastAngles[hinge] = hinge.angle;
-        torqueAutoFoldStableTimes[hinge] = 0f;
-    }
-
-    private bool IsTorqueHingeStateUnchanged(HingeJoint hinge)
-    {
-        if (torqueAutoFoldElapsed < torqueAutoFoldMinRunTime)
-        {
-            TrackTorqueAutoFoldHinge(hinge);
-            return false;
         }
 
-        float previousAngle = torqueAutoFoldLastAngles.TryGetValue(hinge, out float angle)
-            ? angle
-            : hinge.angle;
-        float angleDelta = Mathf.Abs(Mathf.DeltaAngle(previousAngle, hinge.angle));
-        bool angleUnchanged = angleDelta <= torqueAutoFoldAngleChangeTolerance;
-        bool velocitySettled = Mathf.Abs(hinge.velocity) <= torqueAutoFoldVelocityTolerance;
+        if (torqueAutoFoldElapsed >= Mathf.Max(0f, torqueAutoFoldMinRunTime) && allDriversSettled)
+            torqueAutoFoldStableTime += Time.fixedDeltaTime;
+        else
+            torqueAutoFoldStableTime = 0f;
 
-        if (angleUnchanged && velocitySettled)
+        if (torqueAutoFoldStableTime >= Mathf.Max(0.1f, torqueAutoFoldStallSeconds))
         {
-            float stableTime = torqueAutoFoldStableTimes.TryGetValue(hinge, out float time) ? time : 0f;
-            stableTime += Time.fixedDeltaTime;
-            torqueAutoFoldStableTimes[hinge] = stableTime;
-            torqueAutoFoldLastAngles[hinge] = hinge.angle;
-            return stableTime >= torqueAutoFoldStallSeconds;
+            StopTorqueAutoFoldToMax();
+            Debug.Log("[OrigamiController] Torque folding stalled; all hinges are passive.");
         }
-
-        torqueAutoFoldStableTimes[hinge] = 0f;
-        torqueAutoFoldLastAngles[hinge] = hinge.angle;
-        return false;
-    }
-
-    private void ClearTorqueAutoFoldState()
-    {
-        torqueAutoFoldLastAngles.Clear();
-        torqueAutoFoldStableTimes.Clear();
-        torqueAutoFoldStoppedHinges.Clear();
     }
 
     public void ClearAllHinges()
     {
         torqueAutoFoldActive = false;
+        torqueAutoFoldPassive = false;
         torqueAutoFoldElapsed = 0f;
-        ClearTorqueAutoFoldState();
+        torqueAutoFoldStableTime = 0f;
         hinges.Clear();
         hingeInfos.Clear();
         if (physicsMonitor != null)

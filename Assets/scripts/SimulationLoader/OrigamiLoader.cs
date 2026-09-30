@@ -161,7 +161,7 @@ public class OrigamiLoader : MonoBehaviour
         if (model.faces != null && model.faces.Count > 0)
         {
             CreateFaces();
-            if (!elasticFlattenActive && ignoreInternalFaceCollisions)
+            if (!elasticFlattenActive && ignoreInternalFaceCollisions && !model.enableInternalFaceCollisions)
                 IgnoreInternalFaceCollisions();
         }
 
@@ -177,6 +177,21 @@ public class OrigamiLoader : MonoBehaviour
         else
         {
             CreateCreasesAndConnections();
+            if (model.autoTorqueFoldToMechanicalStop)
+            {
+                OrigamiController controller = GetComponent<OrigamiController>();
+                if (controller != null && controller.GetValidHingeCount() > 0)
+                {
+                    controller.StartTorqueAutoFoldToMax();
+                    SliderController sliderController = FindObjectOfType<SliderController>();
+                    if (sliderController != null && sliderController.origami == controller)
+                        sliderController.UpdateSliderValue();
+                }
+                else
+                {
+                    Debug.LogWarning("[OrigamiLoader] Torque folding skipped: no valid hinges were created.");
+                }
+            }
         }
     }
 
