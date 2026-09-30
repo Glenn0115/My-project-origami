@@ -176,12 +176,10 @@ public class OrigamiLoader : MonoBehaviour
         }
         else
         {
-            OrigamiController controller = GetComponent<OrigamiController>();
-            if (controller != null)
-                controller.ConfigureTorqueAutoFoldCreases(model.torqueAutoFoldCreaseIds);
             CreateCreasesAndConnections();
             if (model.autoTorqueFoldToMechanicalStop)
             {
+                OrigamiController controller = GetComponent<OrigamiController>();
                 if (controller != null && controller.GetValidHingeCount() > 0)
                 {
                     controller.StartTorqueAutoFoldToMax();
@@ -236,6 +234,8 @@ public class OrigamiLoader : MonoBehaviour
         {
             OrigamiCrease crease = model.creases[i];
             if (crease == null || crease.type == OrigamiCrease.Type.Boundary)
+                continue;
+            if (crease.driveMode == OrigamiCrease.DriveMode.Passive)
                 continue;
 
             // This is deliberately the existing generic fold-drive path, not
